@@ -839,7 +839,9 @@ var CampaignFlow = (function () {
   function cpStartBatchGenerate() {
     var f = cpFlow();
     var plan = cpExpandAssetPlan();
-    f.generatedAssets = [];
+    /* Preserve any seed asset brought in from the create flow before resetting the list */
+    var seedAssets = (f.generatedAssets || []).filter(function (a) { return a.fromCreate; });
+    f.generatedAssets = seedAssets;
     f.batchTotal = plan.length;
     f.batchDone = 0;
     f.batchGenerating = true;
@@ -1227,6 +1229,12 @@ var CampaignFlow = (function () {
     a.unscheduled = !dateVal;
     renderContent();
   };
+  window.campaignSetAssetTime = function (id, timeVal) {
+    var a = cpGetGeneratedAsset(id);
+    if (!a) return;
+    a.scheduledTime = timeVal || '09:00';
+    /* No full re-render needed — just update state silently */
+  };
   window.campaignAutoSpread = function () {
     var f = cpFlow();
     var conflicts = cpConflictMap();
@@ -1393,6 +1401,9 @@ var CampaignFlow = (function () {
           + '<input type="date" value="' + (a.scheduledDate || '') + '"'
           + (a.unscheduled ? ' class="cp-date-unscheduled"' : '')
           + ' onchange="campaignSetAssetDate(\'' + a.id + '\',this.value)">'
+          + '<input type="time" value="' + (a.scheduledTime || '09:00') + '"'
+          + ' class="cp-time-input"'
+          + ' onchange="campaignSetAssetTime(\'' + a.id + '\',this.value)">'
           + (a.unscheduled ? '<div class="cp-date-unscheduled-hint">+ Add date</div>' : '')
           + '</div>';
       return '<div class="cp-publish-row' + (a.paused ? ' cp-publish-row-paused' : '') + '" draggable="' + (!a.paused) + '"'
@@ -1459,9 +1470,6 @@ var CampaignFlow = (function () {
       + ' ondragenter="cpDragEnterTrash(this)"'
       + ' ondragleave="cpDragLeaveTrash(this)"'
       + ' ondrop="cpDropUnschedule(event)">&#128465; Drop here to unschedule</div>'
-      + '<div style="display:flex;justify-content:flex-end;margin-top:12px;">'
-      + '<button class="btn btn-primary" onclick="campaignPublishFinal()">Publish campaign</button>'
-      + '</div>'
       + '</div>';
   }
 

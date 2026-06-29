@@ -1544,14 +1544,17 @@ var CreateFlow = (function () {
     var defaultDate = now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + pad(now.getDate());
     var defaultTime = pad(now.getHours()) + ':' + pad(now.getMinutes());
     return '<div class="cf-dec-card cf-dec-card-expanded">'
-      + '<div class="cf-dec-card-expanded-title">&#128640; Confirm publish time</div>'
-      + '<div style="display:flex;gap:10px;margin:12px 0 16px;">'
+      + '<div class="cf-dec-card-accent cf-dec-accent-publish"></div>'
+      + '<div class="cf-dec-card-body">'
+      + '<div class="cf-dec-card-title">Confirm publish time</div>'
+      + '<div style="display:flex;gap:10px;margin:14px 0 16px;">'
       + '<div class="cf-field" style="flex:1;"><label>Date</label><input type="date" id="cf-pub-date" value="' + (f.publishDate || defaultDate) + '" onchange="appState.createFlow.publishDate=this.value"></div>'
       + '<div class="cf-field" style="flex:1;"><label>Time</label><input type="time" id="cf-pub-time" value="' + (f.publishTime || defaultTime) + '" onchange="appState.createFlow.publishTime=this.value"></div>'
       + '</div>'
       + '<div style="display:flex;gap:8px;">'
-      + '<button class="btn btn-primary" style="flex:1;" onclick="cfConfirmPublishNow()">&#10003; Publish now</button>'
+      + '<button class="btn btn-primary" style="flex:1;" onclick="cfConfirmPublishNow()">Publish</button>'
       + '<button class="btn btn-outline" onclick="cfCloseDecisionPublish()">Cancel</button>'
+      + '</div>'
       + '</div></div>';
   }
 
@@ -1659,8 +1662,8 @@ var CreateFlow = (function () {
       + '<div class="cf-field"><label>Time</label><input type="time" value="' + (d.time || '') + '" onchange="cfLibSetScheduleField(\'time\',this.value)"></div>'
       + '</div>'
       + '<div class="cf-lib-schedule-actions">'
-      + '<button class="btn btn-primary btn-sm" onclick="cfLibraryAction(\'publish\',\'' + item.id + '\')">\uD83D\uDE80 Publish now</button>'
-      + '<button class="btn btn-outline btn-sm" onclick="cfLibraryAction(\'schedule\',\'' + item.id + '\')">\uD83D\uDCC5 Schedule</button>'
+      + '<button class="btn btn-primary btn-sm" onclick="cfLibraryAction(\'publish\',\'' + item.id + '\')">Publish now</button>'
+      + '<button class="btn btn-outline btn-sm" onclick="cfLibraryAction(\'schedule\',\'' + item.id + '\')">Schedule</button>'
       + '</div></div>';
   }
   function cfLibraryDetail(item) {
@@ -1688,10 +1691,16 @@ var CreateFlow = (function () {
       + '<div class="cf-lib-kv"><span>Last update</span><span>' + item.date + '</span></div>'
       + '</div>'
       + '<div class="cf-lib-drawer-actions">'
-      + '<button class="btn btn-primary" onclick="cfLibraryAction(\'open\',\'' + item.id + '\')">Open</button>'
-      + '<button class="btn btn-outline" onclick="cfLibraryAction(\'duplicate\',\'' + item.id + '\')">Duplicate</button>'
-      + '<button class="btn btn-outline" onclick="cfLibraryAction(\'regenerate\',\'' + item.id + '\')">Regenerate</button>'
-      + (isPublished ? '<button class="btn btn-outline" onclick="cfLibraryAction(\'unpublish\',\'' + item.id + '\')">Unpublish</button>' : '')
+      + (isPublished
+          /* Published: view the variation + duplicate + unpublish */
+          ? '<button class="btn btn-primary" onclick="cfLibraryAction(\'open\',\'' + item.id + '\')">View</button>'
+            + '<button class="btn btn-outline" onclick="cfLibraryAction(\'duplicate\',\'' + item.id + '\')">Duplicate as draft</button>'
+            + '<button class="btn btn-ghost btn-sm" onclick="cfLibraryAction(\'unpublish\',\'' + item.id + '\')">Unpublish</button>'
+          /* Draft / Scheduled: open to edit + regenerate + publish now */
+          : '<button class="btn btn-primary" onclick="cfLibraryAction(\'open\',\'' + item.id + '\')">Open &amp; edit</button>'
+            + '<button class="btn btn-outline" onclick="cfLibraryAction(\'regenerate\',\'' + item.id + '\')">Regenerate</button>'
+            + '<button class="btn btn-outline" onclick="cfLibraryAction(\'duplicate\',\'' + item.id + '\')">Duplicate</button>'
+        )
       + '</div></div>';
   }
 

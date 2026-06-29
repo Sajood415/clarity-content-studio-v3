@@ -255,11 +255,15 @@
   opacity: 0.5; letter-spacing: -1px;
 }
 .cp-publish-row:hover .cp-drag-handle { opacity: 1; }
-.cp-publish-date input {
+.cp-publish-date { position: relative; display: flex; flex-direction: column; gap: 5px; }
+.cp-publish-date input[type="date"] {
   width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm);
   color: var(--text); padding: 8px 10px;
 }
-.cp-publish-date { position: relative; }
+.cp-time-input {
+  width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--muted); padding: 6px 10px; font-size: 12px;
+}
 .cp-date-unscheduled {
   border-style: dashed !important; color: transparent !important;
   background: var(--card) !important;
