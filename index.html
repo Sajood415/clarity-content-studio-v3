@@ -508,7 +508,16 @@ function renderApp() {
   }
 
   if (mode === 'wizard') {
-    /* screenCreateFlow() renders its own topbar with cfConfirmExitWizard back button */
+    /* If the campaign overlay is already in the DOM, only swap its inner content so the
+       slide-in / backdrop animations don't replay on every interaction inside the drawer. */
+    if (appState.cpOverlayOpen) {
+      var existingBody = el.querySelector('.cf-camp-overlay-body');
+      if (existingBody && window.screenCampaign) {
+        existingBody.innerHTML = window.screenCampaign();
+        return;
+      }
+    }
+    /* Full render — screenCreateFlow() manages its own topbar */
     el.innerHTML = screenCreateFlow();
     return;
   }
