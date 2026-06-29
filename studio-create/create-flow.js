@@ -13,29 +13,34 @@ var CreateFlow = (function () {
     { id: 'video', name: 'Video',    desc: 'Short-form, long-form, ads' },
     { id: 'audio', name: 'Audio',    desc: 'Podcast, voiceover, ad spot' }
   ];
+  /* SVG icon strings for platform tiles — no emoji */
+  var CF_ICON_INSTAGRAM = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="3" width="14" height="12" rx="3" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5"/><circle cx="13" cy="5.5" r="1" fill="currentColor"/></svg>';
+  var CF_ICON_SPOTIFY   = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 7.5c2-0.8 5-0.5 7 0.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M6 10c1.5-0.6 4-0.4 5.5 0.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M6.5 12c1-0.4 2.5-0.3 3.5 0.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
+  var CF_ICON_APPLE     = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="6.5" y="2" width="5" height="8" rx="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 9.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="9" y1="15" x2="9" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+  var CF_ICON_MIC       = '<svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="4" y="1" width="5" height="7" rx="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M2 7c0 2.5 2 4.5 4.5 4.5S11 9.5 11 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6.5" y1="11.5" x2="6.5" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>';
   var CF_PLATFORMS = {
     text: [
       { id: 'LinkedIn', icon: 'in', desc: 'Posts, articles' },
-      { id: 'Instagram', icon: '📷', desc: 'Captions, stories' },
+      { id: 'Instagram', icon: CF_ICON_INSTAGRAM, desc: 'Captions, stories' },
       { id: 'X', icon: '𝕏', desc: 'Tweets, threads' },
-      { id: 'Email', icon: '✉', desc: 'Newsletters' }
+      { id: 'Email', icon: '&#9993;', desc: 'Newsletters' }
     ],
     image: [
-      { id: 'Instagram', icon: '📷', desc: 'Feed, Stories' },
+      { id: 'Instagram', icon: CF_ICON_INSTAGRAM, desc: 'Feed, Stories' },
       { id: 'LinkedIn', icon: 'in', desc: 'Banners, carousels' },
       { id: 'Facebook', icon: 'f', desc: 'Reels, feed' },
       { id: 'Pinterest', icon: 'P', desc: 'Pins' }
     ],
     video: [
-      { id: 'Instagram', icon: '📷', desc: 'Reels' },
+      { id: 'Instagram', icon: CF_ICON_INSTAGRAM, desc: 'Reels' },
       { id: 'Facebook', icon: 'f', desc: 'Reels, feed' },
-      { id: 'YouTube', icon: '▶', desc: 'Shorts, long' },
-      { id: 'TikTok', icon: '♪', desc: 'Covers' }
+      { id: 'YouTube', icon: '&#9654;', desc: 'Shorts, long' },
+      { id: 'TikTok', icon: '&#9835;', desc: 'Covers' }
     ],
     audio: [
-      { id: 'Spotify', icon: '🎧', desc: 'Podcast' },
-      { id: 'Apple', icon: '🍎', desc: 'Podcasts' },
-      { id: 'YouTube', icon: '▶', desc: 'Video podcast' }
+      { id: 'Spotify', icon: CF_ICON_SPOTIFY, desc: 'Podcast' },
+      { id: 'Apple', icon: CF_ICON_APPLE, desc: 'Podcasts' },
+      { id: 'YouTube', icon: '&#9654;', desc: 'Video podcast' }
     ]
   };
   var CF_FORMATS = {
@@ -169,7 +174,7 @@ var CreateFlow = (function () {
   }
   var CF_TEXT_VARS = [
     { label: 'A', pf: 81, text: 'While ghost kitchens rise and fall, artisan baking keeps winning. Patience isn\'t a trend — it\'s the moat. Sourdough Saturday pre-orders are live.', storyboard: 'Contrarian hook → craft moat → CTA', rationale: 'Uses market gap data — ghost kitchen vs artisan CAGR' },
-    { label: 'B', pf: 88, text: 'Hot take: the best food businesses aren\'t chasing trends — they\'re outlasting them.\n\n68% of food-tech startups shuttered since 2023. Artisan bakeries grew 14% CAGR.\n\nSourdough Saturday is back. Pre-orders open now. 🍞', storyboard: 'Hot take → stat proof → urgency CTA', rationale: 'Best PF for Maya — data + authenticity tone' },
+    { label: 'B', pf: 88, text: 'Hot take: the best food businesses aren\'t chasing trends — they\'re outlasting them.\n\n68% of food-tech startups shuttered since 2023. Artisan bakeries grew 14% CAGR.\n\nSourdough Saturday is back. Pre-orders open now.', storyboard: 'Hot take → stat proof → urgency CTA', rationale: 'Best PF for Maya — data + authenticity tone' },
     { label: 'C', pf: 74, text: 'Every Saturday: flour, water, time. No shortcuts. Just bread worth waiting for. Sourdough Saturday pre-orders are live — link in bio.', storyboard: 'Ritual → simplicity → soft CTA', rationale: 'Process-story angle from consumer research' }
   ];
   var CF_IMAGE_VARS = [
@@ -343,7 +348,7 @@ var CreateFlow = (function () {
       + '<div class="pref-drawer' + (open ? ' open' : '') + '">'
       + '<div class="pref-drawer-header"><span class="pref-drawer-title">Content Preferences</span><span class="modal-close" onclick="cfClosePrefs()">&#x2715;</span></div>'
       + '<div class="pref-drawer-body">'
-      + '<p style="font-size:12px;color:var(--muted);line-height:1.5;">Set once — applied to every generation. Reduces friction on each create flow.</p>'
+      + '<p class="cf-muted-text">Set once — applied to every generation. Reduces friction on each create flow.</p>'
       + '<div class="cf-field"><label>Visual style</label><select onchange="appState.cfPrefs.style=this.value;renderContent()">'
       + styles.map(function (s) { return '<option' + (p.style === s ? ' selected' : '') + '>' + s + '</option>'; }).join('')
       + '</select></div>'
@@ -550,7 +555,7 @@ var CreateFlow = (function () {
     return '<div class="cf-field cf-control"><label>' + label + '</label>'
       + '<div style="display:flex;align-items:center;gap:10px;margin-top:2px;">'
       + '<div class="toggle-sw' + (on ? ' on' : '') + '" onclick="cfToggleOpt(\'' + key + '\')"><div class="toggle-knob"></div></div>'
-      + '<span style="font-size:12px;color:var(--muted);">' + (on ? 'On' : 'Off') + '</span></div></div>';
+      + '<span class="cf-muted-text">' + (on ? 'On' : 'Off') + '</span></div></div>';
   }
   function cfControlTextarea(key, label, value, placeholder) {
     return '<div class="cf-field cf-control cf-control-full"><label>' + label + '</label>'
@@ -976,7 +981,7 @@ var CreateFlow = (function () {
     // Audio (and final fallback)
     var epTitle    = f.editTitle      != null ? f.editTitle      : v.title;
     var showNotes  = f.editShowNotes  != null ? f.editShowNotes  : 'This episode covers ' + (appState.createBrief.message || 'the topic') + '. Key themes: ' + (appState.createBrief.proof || 'craft, quality, authenticity') + '.';
-    var transcript = f.editTranscript != null ? f.editTranscript : '[Auto-generated transcript will appear here after processing. Edit or replace with your own.]';
+    var transcript = f.editTranscript != null ? f.editTranscript : '';
     return banner + '<div class="cf-step-title">Edit your episode</div><div class="cf-step-sub">' + v.title + ' · ' + v.dur + '</div>' + storyStrip
       + cfBriefSignalBar(true)
       + '<div class="cf-audio-edit">'
@@ -990,7 +995,7 @@ var CreateFlow = (function () {
       + '<textarea oninput="cfFlow().editShowNotes=this.value">' + showNotes + '</textarea>'
       + '<div class="cf-field-help">Published alongside the episode. Include timestamps, links, and CTA.</div></div>'
       + '<div class="cf-field"><label>Transcript <span class="cf-field-label-note">— optional, for accessibility</span></label>'
-      + '<textarea class="cf-transcript-area" oninput="cfFlow().editTranscript=this.value">' + transcript + '</textarea>'
+      + '<textarea class="cf-transcript-area" placeholder="Paste or type the spoken transcript here. Improves accessibility and SEO." oninput="cfFlow().editTranscript=this.value">' + transcript + '</textarea>'
       + '<div class="cf-field-help">Full spoken transcript. Improves SEO and accessibility for listeners.</div></div>'
       + '</div>';
   }
@@ -1009,8 +1014,8 @@ var CreateFlow = (function () {
       + '<div class="cf-publish-layout">'
       + '<div class="cf-publish-preview card">'
       + '<div class="label">Preview</div>'
-      + '<p style="font-size:14px;line-height:1.6;margin:12px 0;">' + (f.modality === 'text' ? (f.editContent || v.text).substring(0, 200) : appState.createBrief.message) + '</p>'
-      + '<p style="font-size:12px;color:var(--muted);line-height:1.5;margin:0 0 12px;"><strong style="color:var(--text);">CTA:</strong> ' + (appState.createBrief.cta || 'No CTA') + '</p>'
+      + '<p class="cf-preview-text">' + (f.modality === 'text' ? (f.editContent || v.text).substring(0, 200) : appState.createBrief.message) + '</p>'
+      + '<p class="cf-preview-sub"><strong style="color:var(--text);">CTA:</strong> ' + (appState.createBrief.cta || 'No CTA') + '</p>'
       + '<div class="cf-storyboard" style="margin-top:12px;"><div class="cf-storyboard-label">Storyboard</div><div class="cf-storyboard-text">' + v.storyboard + '</div></div>'
       + '<div class="cf-storyboard" style="margin-top:8px;"><div class="cf-storyboard-label">Proof Point</div><div class="cf-storyboard-text">' + (appState.createBrief.proof || 'No proof point set') + '</div></div>'
       + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">'
@@ -1059,7 +1064,7 @@ var CreateFlow = (function () {
     }
     return '<div class="cf-success">'
       + '<div class="cf-success-badge"><span class="cf-success-check">&#10003;</span><span class="cf-success-label">' + heading + '</span></div>'
-      + '<p style="color:var(--muted);margin-bottom:12px;line-height:1.6;">' + subline + '</p>'
+      + '<p class="cf-success-sub">' + subline + '</p>'
       + '<p class="cf-success-stat">' + cfPrettyModality(f.modality) + (f.format ? ' · ' + f.format : '') + ' · ' + elapsed + 's</p>'
       + '<div class="cf-success-actions">'
       + '<button class="btn btn-primary" onclick="cfReset()">Create another</button>'
@@ -1247,14 +1252,17 @@ var CreateFlow = (function () {
     if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
     return '' + n;
   }
+  var CF_STAT_ICON_VIEWS    = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 6c1.3-3 2.8-4 5-4s3.7 1 5 4c-1.3 3-2.8 4-5 4s-3.7-1-5-4z" stroke="currentColor" stroke-width="1.2"/><circle cx="6" cy="6" r="1.5" fill="currentColor"/></svg>';
+  var CF_STAT_ICON_LIKES    = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 10S1 6.8 1 4a2.5 2.5 0 015 0 2.5 2.5 0 015 0c0 2.8-5 6-5 6z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>';
+  var CF_STAT_ICON_COMMENTS = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="1.5" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M3 10.5l1.5-2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>';
   function cfStatsRow(item, compact) {
     var s = cfEnsureStats(item);
     var cls = compact ? 'cf-lib-stats' : 'cf-lib-stats cf-lib-stats-lg';
     return '<div class="' + cls + '">'
-      + '<span class="cf-lib-stat">\uD83D\uDC41 ' + cfFmtNum(s.views) + '</span>'
-      + '<span class="cf-lib-stat">\u2764\uFE0F ' + cfFmtNum(s.likes) + '</span>'
-      + '<span class="cf-lib-stat">\uD83D\uDCAC ' + cfFmtNum(s.comments) + '</span>'
-      + '<span class="cf-lib-stat">\u21AA ' + cfFmtNum(s.shares) + '</span>'
+      + '<span class="cf-lib-stat">' + CF_STAT_ICON_VIEWS    + ' ' + cfFmtNum(s.views) + '</span>'
+      + '<span class="cf-lib-stat">' + CF_STAT_ICON_LIKES    + ' ' + cfFmtNum(s.likes) + '</span>'
+      + '<span class="cf-lib-stat">' + CF_STAT_ICON_COMMENTS + ' ' + cfFmtNum(s.comments) + '</span>'
+      + '<span class="cf-lib-stat">&#8618; ' + cfFmtNum(s.shares) + '</span>'
       + '</div>';
   }
   function cfFormatSchedule(dateStr, timeStr) {
@@ -1290,7 +1298,7 @@ var CreateFlow = (function () {
       return '<div class="cf-lib-thumb">' + StudioImage.renderPreview(item.theme || 'sourdough', item.aspect || '1:1', ' ', false) + '</div>';
     }
     if (item.modality === 'video') return '<div class="cf-lib-thumb cf-lib-thumb-video">▶ ' + item.format + '</div>';
-    if (item.modality === 'audio') return '<div class="cf-lib-thumb cf-lib-thumb-audio">🎙 ' + item.format + '</div>';
+    if (item.modality === 'audio') return '<div class="cf-lib-thumb cf-lib-thumb-audio">' + CF_ICON_MIC + ' ' + item.format + '</div>';
     return '<div class="cf-lib-thumb cf-lib-thumb-text">' + (item.previewText || '').substring(0, 92) + '</div>';
   }
   window.cfSetLibraryFilter = function (filter) {
@@ -1372,7 +1380,7 @@ var CreateFlow = (function () {
     var name = brief.goal || 'this content';
     return '<div class="cf-campaign-promo">'
       + '<div class="cf-campaign-promo-left">'
-      + '<div class="cf-campaign-promo-icon">&#128640;</div>'
+      + '<div class="cf-campaign-promo-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 12l4-5 3 2 5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 2h3v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
       + '<div class="cf-campaign-promo-text">'
       + '<div class="cf-campaign-promo-title">Want this across more platforms too? Turn this into a campaign.</div>'
       + '<div class="cf-campaign-promo-sub">Brief, persona &amp; objectives will carry over — just pick your platforms.</div>'
@@ -1484,7 +1492,7 @@ var CreateFlow = (function () {
       preview = '<div class="cf-dec-preview">'
         + '<div class="cf-dec-preview-head">'
         + '<span style="font-size:12px;font-weight:600;">Variation ' + v.label + ' selected</span>'
-        + (hasIntel ? '<span class="pf-chip ' + cfPfClass(pf) + '" style="transform:scale(0.88);"><span class="pf-chip-dot"></span>' + pf + ' PF</span>' : '')
+        + (hasIntel ? '<span class="pf-chip pf-chip-sm ' + cfPfClass(pf) + '"><span class="pf-chip-dot"></span>' + pf + ' PF</span>' : '')
         + '</div>'
         + '<div class="cf-dec-preview-body">' + previewBody + '</div>'
         + '</div>';
@@ -1552,7 +1560,7 @@ var CreateFlow = (function () {
       + '<div class="cf-field" style="flex:1;"><label>Time</label><input type="time" id="cf-pub-time" value="' + (f.publishTime || defaultTime) + '" onchange="appState.createFlow.publishTime=this.value"></div>'
       + '</div>'
       + '<div style="display:flex;gap:8px;">'
-      + '<button class="btn btn-primary" style="flex:1;" onclick="cfConfirmPublishNow()">Publish</button>'
+      + '<button class="btn btn-primary cf-pub-btn-expand" onclick="cfConfirmPublishNow()">Publish</button>'
       + '<button class="btn btn-outline" onclick="cfCloseDecisionPublish()">Cancel</button>'
       + '</div>'
       + '</div></div>';
@@ -1585,15 +1593,21 @@ var CreateFlow = (function () {
     var f = cfFlow();
     /* If nothing meaningful has been entered yet, exit silently */
     if (f.step <= 1 && !f.modality) { setMode('home'); return; }
-    if (window.confirm('You\'ll lose this draft — continue?')) {
-      appState.createFlow.step = 1;
-      appState.createFlow.modality = null;
-      appState.createFlow.platform = null;
-      appState.createFlow.format = null;
-      appState.createFlow.generating = false;
-      appState.createFlow.variation = null;
-      setMode('home');
-    }
+    showConfirmModal({
+      title: 'Leave this draft?',
+      body: 'Your progress on this content won\'t be saved. You can always start a new one from the home screen.',
+      cancelLabel: 'Keep editing',
+      confirmLabel: 'Discard &amp; exit',
+      onConfirm: function () {
+        appState.createFlow.step = 1;
+        appState.createFlow.modality = null;
+        appState.createFlow.platform = null;
+        appState.createFlow.format = null;
+        appState.createFlow.generating = false;
+        appState.createFlow.variation = null;
+        setMode('home');
+      }
+    });
   };
 
   function screenCreateFlow() {
@@ -1630,10 +1644,10 @@ var CreateFlow = (function () {
        Replace the Continue button with a passive hint so the footer stays visually balanced. */
     var continueSlot = (f.step === 5 && !f.generating)
       ? '<span class="cf-step5-pick-hint">Select a variation to continue</span>'
-      : '<button class="btn btn-primary"' + (cfCanContinue() ? '' : ' disabled style="opacity:0.4;"') + ' onclick="cfContinue()">' + cfContinueLabel() + '</button>';
+      : '<button class="btn btn-primary"' + (cfCanContinue() ? '' : ' disabled') + ' onclick="cfContinue()">' + cfContinueLabel() + '</button>';
 
     var footer = '<div class="cf-footer">'
-      + '<button class="btn btn-outline"' + (f.step <= 1 ? ' disabled style="opacity:0.35;"' : '') + ' onclick="cfBack()">← Back</button>'
+      + '<button class="btn btn-outline"' + (f.step <= 1 ? ' disabled' : '') + ' onclick="cfBack()">← Back</button>'
       + '<div class="cf-footer-mid"><span class="cf-eta">Step ' + f.step + ' of ' + CF_STEPS.length + ' &mdash; ' + CF_STEPS[f.step - 1] + '</span></div>'
       + continueSlot
       + '</div>';

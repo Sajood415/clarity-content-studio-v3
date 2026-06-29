@@ -7,11 +7,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="studio-text/studio-text.css?v=4">
+<link rel="stylesheet" href="studio-text/studio-text.css?v=5">
 <link rel="stylesheet" href="studio-image/studio-image.css?v=4">
 <link rel="stylesheet" href="studio-video/studio-video.css?v=3">
-<link rel="stylesheet" href="studio-create/create-flow.css?v=7">
-<link rel="stylesheet" href="studio-campaign/campaign-flow.css?v=7">
+<link rel="stylesheet" href="studio-create/create-flow.css?v=8">
+<link rel="stylesheet" href="studio-campaign/campaign-flow.css?v=8">
 <style>
 /* Reset & tokens */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -221,6 +221,31 @@ a { text-decoration: none; color: inherit; }
 .cf-camp-overlay-body .cp-main {
   overflow-y: auto; height: 100%;
 }
+/* ============================================================
+   STYLED CONFIRM MODAL (replaces window.confirm)
+   ============================================================ */
+.clarity-modal-backdrop {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(8,12,24,0.82);
+  display: flex; align-items: center; justify-content: center;
+  animation: overlay-backdrop-in 0.18s ease;
+}
+.clarity-modal {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px 28px 24px;
+  max-width: 380px; width: 90%;
+  box-shadow: 0 24px 56px rgba(0,0,0,0.55);
+  animation: cf-step-fade 0.18s ease both;
+}
+.clarity-modal-title {
+  font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600;
+  color: var(--text); margin-bottom: 8px;
+}
+.clarity-modal-body {
+  font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 24px;
+}
+.clarity-modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
 /* Close X button in overlay topbar */
 .cf-overlay-close-x {
   width: 32px; height: 32px; padding: 0;
@@ -396,6 +421,26 @@ var appState = {
   intelligence: JSON.parse(JSON.stringify(CLARITY_SAMPLE_INTELLIGENCE))
 };
 
+/* ===================== STYLED CONFIRM MODAL ===================== */
+function showConfirmModal(opts) {
+  var existing = document.getElementById('clarity-modal-root');
+  if (existing) existing.remove();
+  var el = document.createElement('div');
+  el.id = 'clarity-modal-root';
+  el.className = 'clarity-modal-backdrop';
+  el.innerHTML = '<div class="clarity-modal">'
+    + '<div class="clarity-modal-title">' + (opts.title || 'Are you sure?') + '</div>'
+    + '<div class="clarity-modal-body">' + (opts.body || '') + '</div>'
+    + '<div class="clarity-modal-actions">'
+    + '<button class="btn btn-outline" id="cm-cancel">' + (opts.cancelLabel || 'Keep editing') + '</button>'
+    + '<button class="btn btn-primary" id="cm-confirm">' + (opts.confirmLabel || 'Discard &amp; exit') + '</button>'
+    + '</div></div>';
+  document.body.appendChild(el);
+  el.querySelector('#cm-cancel').onclick = function () { el.remove(); };
+  el.querySelector('#cm-confirm').onclick = function () { el.remove(); opts.onConfirm && opts.onConfirm(); };
+  el.onclick = function (e) { if (e.target === el) el.remove(); };
+}
+
 /* ===================== MODE SYSTEM ===================== */
 function setMode(mode) {
   appState.mode = mode;
@@ -568,8 +613,8 @@ function init() {
 window.addEventListener('load', init);
 
 </script>
-<script src="studio-create/create-flow.js?v=10"></script>
-<script src="studio-campaign/campaign-flow.js?v=10"></script>
+<script src="studio-create/create-flow.js?v=11"></script>
+<script src="studio-campaign/campaign-flow.js?v=11"></script>
 <script src="studio-text/studio-text.js?v=8"></script>
 <script src="studio-image/studio-image.js?v=7"></script>
 <script src="studio-video/studio-video.js?v=5"></script>

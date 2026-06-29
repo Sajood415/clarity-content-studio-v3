@@ -118,6 +118,7 @@
 }
 .cf-brief-cards > .cf-creative-controls {
   margin-top: 0;
+  border-left: 3px solid var(--primary);
 }
 .cf-field-label-note {
   font-size: 9px; font-weight: 500; text-transform: none;
@@ -315,8 +316,7 @@
 .cf-handoff-item em { display: block; font-style: normal; font-size: 11px; color: var(--muted); line-height: 1.35; }
 .cf-handoff-foot { display: flex; gap: 8px; flex-wrap: wrap; }
 
-/* Format suggestions */
-.format-chip.cf-suggested { border-color: rgba(52,211,153,0.5); background: rgba(52,211,153,0.08); }
+/* Format suggestions — indigo is the single active-state accent across all chips */
 .cf-format-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
 .cf-suggest-badge {
   font-size: 11px; font-weight: 600; color: #34d399;
@@ -439,12 +439,19 @@
 }
 .cf-connector.ok span:last-child { color: #34d399; font-weight: 600; font-size: 11px; }
 .cf-pub-btn { width: 100%; justify-content: center; }
+.cf-pub-btn-expand { flex: 1; justify-content: center; }
 
 /* Footer & success */
 .cf-footer-mid { flex: 1; text-align: center; }
 .cf-eta { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
 .cf-step5-pick-hint { font-size: 12px; color: var(--muted); font-style: italic; opacity: 0.7; }
-.btn[disabled] { cursor: not-allowed; pointer-events: none; filter: grayscale(0.25); }
+.btn[disabled] { cursor: not-allowed; pointer-events: none; opacity: 0.4; }
+/* ─── Utility classes replacing scattered inline styles ─────── */
+.cf-muted-text { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.cf-preview-text { font-size: 14px; line-height: 1.6; margin: 12px 0; }
+.cf-preview-sub { font-size: 12px; color: var(--muted); line-height: 1.5; margin: 0 0 12px; }
+.cf-success-sub { color: var(--muted); margin-bottom: 12px; line-height: 1.6; }
+.pf-chip-sm { transform: scale(0.88); transform-origin: right center; }
 .cf-success-wrap { display: flex; align-items: center; justify-content: center; min-height: 60vh; }
 .cf-success-ring {
   width: 52px; height: 52px; margin: 0 auto 20px; border-radius: 50%;

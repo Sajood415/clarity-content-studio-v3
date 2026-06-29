@@ -3,13 +3,14 @@ var CampaignFlow = (function () {
   var CP_STEPS = ['Goal & Timing', 'Platforms', 'Series', 'Asset Mix', 'Brief', 'Generate', 'Edit', 'Publish'];
   var CP_SERIES_PATTERNS = ['Custom', 'Awareness Drip', 'Launch Countdown', 'Last Call'];
   var CP_OBJECTIVES = ['Awareness', 'Launch', 'Re-engagement', 'Promotion', 'Community'];
+  var CP_ICON_INSTAGRAM = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="3" width="14" height="12" rx="3" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5"/><circle cx="13" cy="5.5" r="1" fill="currentColor"/></svg>';
   var CP_PLATFORMS = [
     { id: 'LinkedIn', icon: 'in', desc: 'B2B reach' },
-    { id: 'Instagram', icon: '📷', desc: 'Visual + stories' },
+    { id: 'Instagram', icon: CP_ICON_INSTAGRAM, desc: 'Visual + stories' },
     { id: 'Facebook', icon: 'f', desc: 'Broad local audience' },
-    { id: 'Email', icon: '✉', desc: 'Owned audience' },
+    { id: 'Email', icon: '&#9993;', desc: 'Owned audience' },
     { id: 'X', icon: '𝕏', desc: 'Real-time updates' },
-    { id: 'YouTube', icon: '▶', desc: 'Long + short video' }
+    { id: 'YouTube', icon: '&#9654;', desc: 'Long + short video' }
   ];
   var CP_BUNDLE_RULES = {
     LinkedIn:  [{ key: 'li-post',  label: 'LinkedIn posts',         count: 3, modality: 'text'  }],
@@ -41,12 +42,15 @@ var CampaignFlow = (function () {
       };
     }
   }
+  var CP_STAT_ICON_VIEWS    = '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M1 6c1.3-3 2.8-4 5-4s3.7 1 5 4c-1.3 3-2.8 4-5 4s-3.7-1-5-4z" stroke="currentColor" stroke-width="1.2"/><circle cx="6" cy="6" r="1.5" fill="currentColor"/></svg>';
+  var CP_STAT_ICON_COMMENTS = '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><rect x="1" y="1.5" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M3 10.5l1.5-2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>';
+  var CP_STAT_ICON_LIKES    = '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 10S1 6.8 1 4a2.5 2.5 0 015 0 2.5 2.5 0 015 0c0 2.8-5 6-5 6z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>';
   function cpLiveStatInner(id) {
     var s = _cpLiveStats[id];
     if (!s) return '<span class="cp-live-metric">\u2014</span>';
-    return '<span class="cp-live-metric">\uD83D\uDC41 ' + s.views + ' views</span>'
-      + '<span class="cp-live-metric">\uD83D\uDCAC ' + s.comments + ' comments</span>'
-      + '<span class="cp-live-metric">\u2764\uFE0F ' + s.reactions + ' reactions</span>';
+    return '<span class="cp-live-metric">' + CP_STAT_ICON_VIEWS + ' ' + s.views + ' views</span>'
+      + '<span class="cp-live-metric">' + CP_STAT_ICON_COMMENTS + ' ' + s.comments + ' comments</span>'
+      + '<span class="cp-live-metric">' + CP_STAT_ICON_LIKES + ' ' + s.reactions + ' reactions</span>';
   }
   function cpStartLiveInterval() {
     if (_cpLiveInterval) return;
@@ -981,7 +985,7 @@ var CampaignFlow = (function () {
         + '<div class="cp-step-sub">Ready to generate ' + total + ' asset' + (total === 1 ? '' : 's') + ' across ' + seriesCount + ' series and ' + f.platforms.length + ' platform' + (f.platforms.length === 1 ? '' : 's') + '.</div>'
         + '<div class="cp-intel-nudge">'
         + '<div class="cp-intel-nudge-body">'
-        + '<div class="cp-intel-nudge-icon">&#128269;</div>'
+        + '<div class="cp-intel-nudge-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>'
         + '<div><div class="cp-intel-nudge-title">Your results will be more accurate with research context.</div>'
         + '<div class="cp-intel-nudge-sub">Complete Intelligence setup to sharpen persona fit and messaging across all generated assets.</div>'
         + '</div></div>'
@@ -1017,7 +1021,7 @@ var CampaignFlow = (function () {
     return '<div class="cp-step-title">Generate</div>'
       + '<div class="cp-step-sub">Batch generation complete. Assets are ready for review.</div>'
       + '<div class="card">'
-      + '<div class="flex-between"><div><div class="label">Generation summary</div><div style="font-size:18px;font-weight:600;">' + done + ' / ' + total + ' assets generated</div></div>'
+      + '<div class="flex-between"><div><div class="label">Generation summary</div><div class="cp-count-summary">' + done + ' / ' + total + ' assets generated</div></div>'
       + '<button class="btn btn-outline btn-sm" onclick="cpRegenerateBatch()">↻ Regenerate batch</button></div>'
       + cpGeneratedOverviewGrid(f.generatedAssets, false)
       + '</div>';
@@ -1180,7 +1184,7 @@ var CampaignFlow = (function () {
     return '<div class="cp-step-title">Edit</div>'
       + '<div class="cp-step-sub">Review campaign assets. Open any item for single-asset edit.</div>'
       + '<div class="card">'
-      + '<div class="flex-between"><div><div class="label">Overview</div><div style="font-size:18px;font-weight:600;">' + f.generatedAssets.length + ' assets generated</div></div>'
+      + '<div class="flex-between"><div><div class="label">Overview</div><div class="cp-count-summary">' + f.generatedAssets.length + ' assets generated</div></div>'
       + '<button class="btn btn-outline btn-sm" onclick="campaignBulkApproveReady()">Approve all Ready</button></div>'
       + '<div style="margin:10px 0 12px;display:flex;gap:8px;flex-wrap:wrap;"><span class="pill pill-green">' + cpApprovedAssets().length + ' approved</span><span class="pill pill-muted">' + (f.generatedAssets.length - cpApprovedAssets().length) + ' pending</span></div>'
       + overviewCards
@@ -1438,8 +1442,8 @@ var CampaignFlow = (function () {
           + '<div class="cp-series-pub-actions">'
           + (seriesAssets.length
               ? (allPaused
-                  ? '<button class="btn btn-outline btn-sm" onclick="campaignResumeSeries(\'' + s.id + '\')">▶ Resume series</button>'
-                  : '<button class="btn btn-outline btn-sm" onclick="campaignPauseSeries(\'' + s.id + '\')">⏸ Pause series</button>')
+                  ? '<button class="btn btn-outline btn-sm" onclick="campaignResumeSeries(\'' + s.id + '\')">Resume series</button>'
+                  : '<button class="btn btn-outline btn-sm" onclick="campaignPauseSeries(\'' + s.id + '\')">Pause series</button>')
               : '')
           + (seriesAssets.length
               ? '<div class="cp-series-schedule-group">'
@@ -1460,7 +1464,7 @@ var CampaignFlow = (function () {
       + '<div class="cp-step-sub">Schedule approved assets by platform and date before publishing campaign.</div>'
       + '<div class="card">'
       + '<div class="flex-between"><div><div class="label">Approved assets</div>'
-      + '<div style="font-size:18px;font-weight:600;">' + scheduledCount + ' of ' + approved.length + ' scheduled</div></div>'
+      + '<div class="cp-count-summary">' + scheduledCount + ' of ' + approved.length + ' scheduled</div></div>'
       + (hasConflicts ? '<button class="btn btn-outline btn-sm" onclick="campaignAutoSpread()">Auto-spread schedule</button>' : '<span class="pill pill-green">No conflicts</span>')
       + '</div>'
       + (approved.length > 1 ? '<div class="cp-drag-hint"><span>⠿</span> Drag a row onto another to take that date · drop on the zone below to unschedule</div>' : '')
@@ -1469,7 +1473,7 @@ var CampaignFlow = (function () {
       + ' ondragover="event.preventDefault()"'
       + ' ondragenter="cpDragEnterTrash(this)"'
       + ' ondragleave="cpDragLeaveTrash(this)"'
-      + ' ondrop="cpDropUnschedule(event)">&#128465; Drop here to unschedule</div>'
+      + ' ondrop="cpDropUnschedule(event)"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 4h10M5 4V2.5h4V4M5.5 6v4.5M8.5 6v4.5M3 4l.7 7.5h6.6L11 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Drop here to unschedule</div>'
       + '</div>';
   }
 
@@ -1691,11 +1695,11 @@ var CampaignFlow = (function () {
     var grouped = cpGroupAssetsByPlatform(c.assets || []);
     var approvedCount = (c.assets || []).filter(function (a) { return a.approved; }).length;
     var brief = (c.brief && c.brief.shared) || {};
-    var sampleBadge = c.isSample ? '<span class="pill pill-muted" style="margin-left:8px;">Sample</span>' : '';
+    var sampleBadge = c.isSample ? '<span class="pill pill-muted cp-sample-pill">Sample</span>' : '';
     var health = cpHealthScore(c);
     var platformKpis = platforms.map(function (p) {
       var count = (grouped[p] || []).length;
-      return '<div class="card cp-platform-kpi"><div class="label">' + p + '</div><div class="cp-kpi-val" style="font-size:20px;">' + count + '</div><div class="cp-campaign-meta">' + count + ' asset' + (count === 1 ? '' : 's') + '</div></div>';
+      return '<div class="card cp-platform-kpi"><div class="label">' + p + '</div><div class="cp-kpi-val">' + count + '</div><div class="cp-campaign-meta">' + count + ' asset' + (count === 1 ? '' : 's') + '</div></div>';
     }).join('');
     var platformSections = platforms.map(function (p) {
       var items = grouped[p] || [];
@@ -1798,7 +1802,7 @@ var CampaignFlow = (function () {
             return '<div class="cp-campaign-card" onclick="campaignOpenDetail(\'' + c.id + '\')">'
               + '<div class="flex-between"><div class="cp-campaign-name">' + c.name + '</div>' + statusPill + '</div>'
               + '<div class="cp-campaign-meta">' + c.goal + '</div>'
-              + '<div class="cp-campaign-dates">\uD83D\uDCC5 ' + cpFmtDate(c.startDate) + (c.startTime ? ' \u00B7 ' + cpFmtTime(c.startTime) : '') + ' \u2192 ' + cpFmtDate(c.endDate) + (c.endTime ? ' \u00B7 ' + cpFmtTime(c.endTime) : '') + '</div>'
+              + '<div class="cp-campaign-dates">' + cpFmtDate(c.startDate) + (c.startTime ? ' \u00B7 ' + cpFmtTime(c.startTime) : '') + ' \u2192 ' + cpFmtDate(c.endDate) + (c.endTime ? ' \u00B7 ' + cpFmtTime(c.endTime) : '') + '</div>'
               + '<div class="cp-campaign-meta">' + c.totalAssets + ' assets · ' + cpCampaignPlatforms(c).join(', ') + '</div>'
               + liveLine
               + '</div>';
@@ -1806,7 +1810,7 @@ var CampaignFlow = (function () {
         + '</div></div>';
     }
     return '<div class="screen">' + header
-      + '<div class="screen-sub" style="margin-bottom:12px;">Manage active and scheduled campaigns</div>'
+      + '<div class="screen-sub cp-campaigns-sub">Manage active and scheduled campaigns</div>'
       + '<div class="cp-campaign-list">'
       + campaigns.map(function (c) {
           var status = cpCampaignStatusForCard(c);
@@ -1817,7 +1821,7 @@ var CampaignFlow = (function () {
           return '<div class="cp-campaign-card" onclick="campaignOpenDetail(\'' + c.id + '\')">'
             + '<div class="flex-between"><div class="cp-campaign-name">' + c.name + '</div>' + statusPill + '</div>'
             + '<div class="cp-campaign-meta">' + c.goal + '</div>'
-            + '<div class="cp-campaign-dates">\uD83D\uDCC5 ' + cpFmtDate(c.startDate) + (c.startTime ? ' \u00B7 ' + cpFmtTime(c.startTime) : '') + ' \u2192 ' + cpFmtDate(c.endDate) + (c.endTime ? ' \u00B7 ' + cpFmtTime(c.endTime) : '') + '</div>'
+            + '<div class="cp-campaign-dates">' + cpFmtDate(c.startDate) + (c.startTime ? ' \u00B7 ' + cpFmtTime(c.startTime) : '') + ' \u2192 ' + cpFmtDate(c.endDate) + (c.endTime ? ' \u00B7 ' + cpFmtTime(c.endTime) : '') + '</div>'
             + '<div class="cp-campaign-meta">' + c.totalAssets + ' assets' + (cpCampaignPlatforms(c).length ? ' · ' + cpCampaignPlatforms(c).join(', ') : '') + '</div>'
             + liveLine
             + '</div>';
@@ -1839,7 +1843,7 @@ var CampaignFlow = (function () {
     }
     function phBlock(label, msg) {
       return '<div class="cf-intel-block"><div class="label">' + label + '</div>'
-        + '<div class="cf-intel-text" style="font-style:italic;opacity:0.8;">' + msg + '</div></div>';
+        + '<div class="cf-intel-text cf-intel-text-empty">' + msg + '</div></div>';
     }
 
     var personaBlock = persona.name
@@ -1908,9 +1912,9 @@ var CampaignFlow = (function () {
       + topbar
       + '<div class="cf-body cp-flow-body' + (appState.cpSidebarOpen ? '' : ' cf-sidebar-collapsed') + '"><div class="cp-main">' + cpStepper() + content + '</div>' + cpIntelRail() + '</div>'
       + '<div class="cf-footer">'
-      + '<button class="btn btn-outline"' + (f.step <= (isOverlay ? 2 : 1) ? ' disabled style="opacity:0.35;"' : '') + ' onclick="campaignBack()">← Back</button>'
+      + '<button class="btn btn-outline"' + (f.step <= (isOverlay ? 2 : 1) ? ' disabled' : '') + ' onclick="campaignBack()">← Back</button>'
       + '<div class="cf-footer-mid"><span class="cf-eta">Campaign · ' + CP_STEPS.length + ' steps</span></div>'
-      + (f.step < 8 ? '<button class="btn btn-primary"' + (canContinue() ? '' : ' disabled style="opacity:0.4;"') + ' onclick="campaignContinue()">' + cpContinueLabel() + '</button>' : endBtn)
+      + (f.step < 8 ? '<button class="btn btn-primary"' + (canContinue() ? '' : ' disabled') + ' onclick="campaignContinue()">' + cpContinueLabel() + '</button>' : endBtn)
       + '</div>'
       + '</div>';
   }

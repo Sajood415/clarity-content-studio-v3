@@ -19,14 +19,13 @@
 .cp-main { padding: 28px 32px; overflow-y: auto; max-width: 1100px; width: 100%; margin: 0 auto; }
 /* Inside the flow grid (with intelligence rail) the main column fills its track */
 .cp-flow-body .cp-main { max-width: none; margin: 0; }
-.cp-step-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 600; margin-bottom: 6px; }
+.cp-step-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; margin-bottom: 6px; }
 .cp-step-sub { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
 .cp-form { display: flex; flex-direction: column; gap: 12px; max-width: 720px; }
 /* Centered Step 1 setup */
 .cp-setup-center {
-  max-width: 520px; margin: 0 auto; padding-top: 32px; text-align: center;
+  max-width: 520px; margin: 0 auto; padding-top: 20px; text-align: center;
 }
-.cp-setup-center .cp-step-title { font-size: 34px; }
 .cp-setup-center .cp-step-sub { margin-bottom: 28px; }
 .cp-setup-center .cp-form { max-width: none; text-align: left; }
 .cp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -130,7 +129,7 @@
   gap: 10px; align-items: start;
 }
 .cp-generated-card {
-  background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius);
   padding: 10px; display: flex; flex-direction: column; gap: 8px;
 }
 .cp-generated-card.interactive { cursor: pointer; transition: border-color 0.15s, transform 0.15s; }
@@ -297,6 +296,9 @@
   cursor: pointer; transition: all 0.2s;
 }
 .cp-campaign-card:hover { border-color: var(--primary); transform: translateY(-1px); }
+.cp-campaigns-sub { margin-bottom: 12px; }
+.cf-intel-text-empty { font-style: italic; opacity: 0.8; }
+.cp-sample-pill { margin-left: 8px; }
 .cp-create-hint {
   display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
   padding: 10px 14px; margin-bottom: 18px; border-radius: var(--radius-sm);
@@ -446,10 +448,10 @@
 
 /* ─── Step 5 intelligence nudge banner ─────────────────────────── */
 .cp-intel-nudge {
-  background: #fffbeb;
-  border: 1px solid #fcd34d;
-  border-radius: 12px;
-  padding: 20px 24px;
+  background: rgba(245,158,11,0.07);
+  border: 1px solid rgba(245,158,11,0.28);
+  border-radius: var(--radius);
+  padding: 18px 20px;
   margin-bottom: 24px;
   animation: cpNudgeIn 0.25s ease;
 }
@@ -458,20 +460,23 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 .cp-intel-nudge-body {
-  display: flex; align-items: flex-start; gap: 14px; margin-bottom: 16px;
+  display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px;
 }
 .cp-intel-nudge-icon {
-  font-size: 22px; line-height: 1; flex-shrink: 0; margin-top: 2px;
+  flex-shrink: 0; margin-top: 1px; color: var(--warning);
+  display: flex; align-items: center;
 }
 .cp-intel-nudge-title {
-  font-size: 14px; font-weight: 600; color: #92400e; margin-bottom: 4px;
+  font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px;
 }
 .cp-intel-nudge-sub {
-  font-size: 13px; color: #78350f; line-height: 1.5;
+  font-size: 13px; color: var(--muted); line-height: 1.55;
 }
 .cp-intel-nudge-actions {
   display: flex; gap: 10px; flex-wrap: wrap;
 }
+/* ─── Repeated count summary (Generate / Edit / Publish steps) ── */
+.cp-count-summary { font-size: 18px; font-weight: 600; }
 
 @media (max-width: 1000px) {
   .cp-mix-grid { grid-template-columns: repeat(2, 1fr); }
