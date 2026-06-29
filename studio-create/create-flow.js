@@ -1704,18 +1704,8 @@ var CreateFlow = (function () {
       + (item.controls ? '<div class="cf-lib-kv"><span>Controls</span><span>' + item.controls + '</span></div>' : '')
       + '<div class="cf-lib-kv"><span>Last update</span><span>' + item.date + '</span></div>'
       + '</div>'
-      + '<div class="cf-lib-drawer-actions">'
-      + (isPublished
-          /* Published: view the variation + duplicate + unpublish */
-          ? '<button class="btn btn-primary" onclick="cfLibraryAction(\'open\',\'' + item.id + '\')">View</button>'
-            + '<button class="btn btn-outline" onclick="cfLibraryAction(\'duplicate\',\'' + item.id + '\')">Duplicate as draft</button>'
-            + '<button class="btn btn-ghost btn-sm" onclick="cfLibraryAction(\'unpublish\',\'' + item.id + '\')">Unpublish</button>'
-          /* Draft / Scheduled: open to edit + regenerate + publish now */
-          : '<button class="btn btn-primary" onclick="cfLibraryAction(\'open\',\'' + item.id + '\')">Open &amp; edit</button>'
-            + '<button class="btn btn-outline" onclick="cfLibraryAction(\'regenerate\',\'' + item.id + '\')">Regenerate</button>'
-            + '<button class="btn btn-outline" onclick="cfLibraryAction(\'duplicate\',\'' + item.id + '\')">Duplicate</button>'
-        )
-      + '</div></div>';
+      + '</div>'
+      + '</div>';
   }
 
   function screenLibrary() {
