@@ -50,11 +50,16 @@ a { text-decoration: none; color: inherit; }
 }
 
 /* Brand wordmark top-left */
-.home-brand { padding: 26px 32px; }
-.home-brand-name {
-  font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 700;
-  color: var(--primary); line-height: 1;
+.home-brand {
+  padding: 24px 36px;
+  display: flex; align-items: center; justify-content: space-between;
 }
+.home-brand-name {
+  font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700;
+  color: var(--text); letter-spacing: 0.01em; line-height: 1;
+}
+.home-brand-name em { color: var(--primary); font-style: normal; }
+.home-brand-meta { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
 
 /* Centered nudge area */
 .home-center {
@@ -93,12 +98,12 @@ a { text-decoration: none; color: inherit; }
 }
 
 .home-heading {
-  font-family: 'Cormorant Garamond', serif; font-size: 52px; font-weight: 600;
-  color: var(--text); line-height: 1.1; margin-bottom: 16px;
+  font-family: 'Cormorant Garamond', serif; font-size: 42px; font-weight: 600;
+  color: var(--text); line-height: 1.12; margin-bottom: 14px; letter-spacing: -0.01em;
 }
 .home-sub {
-  font-size: 16px; color: var(--muted); line-height: 1.65; margin-bottom: 32px;
-  max-width: 480px; margin-left: auto; margin-right: auto;
+  font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 32px;
+  max-width: 440px; margin-left: auto; margin-right: auto;
 }
 .home-sub strong { color: var(--text); font-weight: 500; }
 
@@ -116,17 +121,18 @@ a { text-decoration: none; color: inherit; }
 
 /* Intelligence summary cards (State A only) */
 .home-intel-cards {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
-  max-width: 700px; width: 100%; margin-top: 36px;
-  animation: nudge-enter 0.55s 0.12s cubic-bezier(.22,.68,0,1.2) both;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  max-width: 680px; width: 100%; margin-top: 32px;
+  animation: nudge-enter 0.5s 0.1s cubic-bezier(.22,.68,0,1.2) both;
 }
 .home-intel-card {
   background: var(--card); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 16px 18px; text-align: left;
+  border-top: 2px solid var(--primary);
 }
 .home-intel-card-label {
-  font-size: 10px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px;
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--muted); margin-bottom: 9px;
 }
 .home-intel-card-val { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; line-height: 1.35; }
 .home-intel-card-sub { font-size: 11px; color: var(--muted); line-height: 1.5; }
@@ -446,15 +452,15 @@ function screenHome() {
     var marketTrend = intel.market ? intel.market.trend.split('·')[0].trim() : 'your market';
 
     nudgeHtml = '<div class="home-nudge">'
-      + '<div class="home-status"><span class="home-pulse-dot"></span>Strategy ready</div>'
-      + '<h1 class="home-heading">Your strategy is ready.</h1>'
-      + '<p class="home-sub">You\'re targeting <strong>' + personaName + '</strong> in the <strong>' + marketTrend + '</strong> space. Want me to suggest what to create first?</p>'
+      + '<div class="home-status"><span class="home-pulse-dot"></span>Intelligence active</div>'
+      + '<h1 class="home-heading">Ready to create content.</h1>'
+      + '<p class="home-sub">Strategy loaded for <strong>' + personaName + '</strong> in the <strong>' + marketTrend + '</strong> space. Every piece of content you create will be informed by this context.</p>'
       + '<div class="home-actions">'
-      + '<button class="btn btn-primary btn-lg" onclick="setMode(\'wizard\')">Yes, let\'s create</button>'
-      + '<button class="btn btn-outline" onclick="setMode(\'library\')">Browse library</button>'
+      + '<button class="btn btn-primary btn-lg" onclick="setMode(\'wizard\')">Create content</button>'
+      + '<button class="btn btn-outline" onclick="setMode(\'library\')">View library</button>'
       + '</div>'
       + (campaigns.length
-          ? '<div class="home-campaigns-link">You have ' + campaigns.length + ' campaign' + (campaigns.length === 1 ? '' : 's') + ' — <a href="#" onclick="setMode(\'campaign\'); return false;">view campaigns</a></div>'
+          ? '<div class="home-campaigns-link">You have ' + campaigns.length + ' active campaign' + (campaigns.length === 1 ? '' : 's') + ' — <a href="#" onclick="setMode(\'campaign\'); return false;">view campaigns</a></div>'
           : '')
       + '</div>';
 
@@ -481,17 +487,17 @@ function screenHome() {
     /* ---- State B: No intelligence ---- */
     nudgeHtml = '<div class="home-nudge">'
       + '<div class="home-warn-badge">No strategy loaded</div>'
-      + '<h1 class="home-heading">What do you want to create?</h1>'
-      + '<p class="home-sub">You haven\'t completed your research yet. You can still create content, but results will be sharper with strategy context.</p>'
+      + '<h1 class="home-heading">Create content.</h1>'
+      + '<p class="home-sub">Intelligence context is not loaded. Content generation will work without it — activate intelligence for results grounded in your strategy and audience research.</p>'
       + '<div class="home-actions">'
-      + '<button class="btn btn-primary btn-lg" onclick="setMode(\'wizard\')">Let\'s create</button>'
-      + '<button class="btn btn-ghost" onclick="claritySetIntelMode(\'on\')">Set up intelligence first</button>'
+      + '<button class="btn btn-primary btn-lg" onclick="setMode(\'wizard\')">Create content</button>'
+      + '<button class="btn btn-outline" onclick="claritySetIntelMode(\'on\')">Activate intelligence</button>'
       + '</div>'
       + '</div>';
   }
 
   return '<div class="home-wrap">'
-    + '<div class="home-brand"><span class="home-brand-name">Clarity</span></div>'
+    + '<div class="home-brand"><span class="home-brand-name"><em>Clarity</em> Content Studio</span><span class="home-brand-meta">v3</span></div>'
     + '<div class="home-center">' + nudgeHtml + cardsHtml + '</div>'
     + toggleHtml
     + '</div>';
@@ -517,8 +523,17 @@ function renderApp() {
         return;
       }
     }
-    /* Full render — screenCreateFlow() manages its own topbar */
+    /* Full render with a step-fade so the DOM swap isn't a hard cut */
+    var prev = el.querySelector('.cf-main, .cf-decision-wrap');
+    if (prev) {
+      prev.style.animation = 'none';
+      prev.style.opacity = '0';
+    }
     el.innerHTML = screenCreateFlow();
+    var next = el.querySelector('.cf-main, .cf-decision-wrap');
+    if (next) {
+      next.style.animation = 'cf-step-fade 0.18s ease both';
+    }
     return;
   }
 

@@ -1,11 +1,17 @@
 /* Unified creation flow — 5-step wizard: what → where → format → brief → generate */
 var CreateFlow = (function () {
   var CF_STEPS = ['What', 'Where', 'Format', 'Brief', 'Generate'];
+  var CF_MOD_ICONS = {
+    text:  '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="3.5" width="14" height="1.75" rx="0.875" fill="currentColor"/><rect x="2" y="8" width="11" height="1.75" rx="0.875" fill="currentColor"/><rect x="2" y="12.5" width="8" height="1.75" rx="0.875" fill="currentColor"/></svg>',
+    image: '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="14" height="14" rx="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M2 13l4-5 3.5 3.5 2.5-3L16 13" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="6.5" cy="6.5" r="1.25" fill="currentColor"/></svg>',
+    video: '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1.5" y="4" width="10.5" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M12 8.5l4.5-3v7L12 9.5V8.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>',
+    audio: '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 11.5V6.5H5.5L10 3.5v11L5.5 11.5H2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M13 6.5c1.5 1 1.5 4 0 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>'
+  };
   var CF_MODS = [
-    { id: 'text', icon: '✍', name: 'Text', desc: 'Posts, captions, email' },
-    { id: 'image', icon: '🖼', name: 'Image', desc: 'Feed, story, banners' },
-    { id: 'video', icon: '🎬', name: 'Video', desc: 'Reels, shorts, ads' },
-    { id: 'audio', icon: '🎙', name: 'Audio', desc: 'Podcast, voiceover' }
+    { id: 'text',  name: 'Written',  desc: 'Posts, articles, email, threads' },
+    { id: 'image', name: 'Image',    desc: 'Feed posts, carousels, banners' },
+    { id: 'video', name: 'Video',    desc: 'Short-form, long-form, ads' },
+    { id: 'audio', name: 'Audio',    desc: 'Podcast, voiceover, ad spot' }
   ];
   var CF_PLATFORMS = {
     text: [
@@ -565,12 +571,14 @@ var CreateFlow = (function () {
   function cfStepModality() {
     var f = cfFlow();
     return '<div class="cf-hero">'
-      + '<div class="cf-welcome-heading">What do you want to create?</div>'
-      + '<div class="cf-welcome-sub">Pick a content type and we\'ll handle the rest. Your research, tone, and brand are already loaded.</div>'
+      + '<div class="cf-step-title">Select content type</div>'
+      + '<div class="cf-step-sub">Choose the format for this piece of content.</div>'
       + '<div class="cf-mod-grid">'
       + CF_MODS.map(function (m) {
-          return '<div class="cf-mod-tile' + (f.modality === m.id ? ' selected' : '') + '" onclick="cfSelectModality(\'' + m.id + '\')">'
-            + '<div class="cf-mod-icon">' + m.icon + '</div>'
+          var sel = f.modality === m.id;
+          return '<div class="cf-mod-tile' + (sel ? ' selected' : '') + '" onclick="cfSelectModality(\'' + m.id + '\')">'
+            + '<div class="cf-mod-icon-wrap">' + CF_MOD_ICONS[m.id] + '</div>'
+            + (sel ? '<div class="cf-mod-check">&#10003;</div>' : '')
             + '<div class="cf-mod-name">' + m.name + '</div>'
             + '<div class="cf-mod-desc">' + m.desc + '</div></div>';
         }).join('')
@@ -587,8 +595,8 @@ var CreateFlow = (function () {
         + '<div class="platform-tile-name">' + p.id + '</div>'
         + '<div class="platform-tile-desc">' + p.desc + '</div></div>';
     }).join('');
-    return '<div class="cf-step-title">Platform</div>'
-      + '<div class="cf-step-sub">Pick where this content will be published</div>'
+    return '<div class="cf-step-title">Publishing platform</div>'
+      + '<div class="cf-step-sub">Select the platform this content is being created for.</div>'
       + '<div class="platform-tile-grid">' + platHtml + '</div>'
       + (f.platform ? '<div class="cf-format-meta"><span class="pill pill-indigo">' + f.platform + ' selected</span></div>' : '');
   }
@@ -613,7 +621,7 @@ var CreateFlow = (function () {
         + '</div>' : '')
       : '<div class="cf-history-empty" style="padding:24px 0;">Select a platform first to see recommended formats.</div>';
     return '<div class="cf-step-title">Format</div>'
-      + '<div class="cf-step-sub">Auto-sized to platform standards with smart recommendations</div>'
+      + '<div class="cf-step-sub">Dimensions and format are pre-set to ' + (f.platform || 'platform') + ' standards. Adjust as needed.</div>'
       + (f.platform ? '<div class="pill pill-muted" style="margin-bottom:10px;">' + f.platform + '</div>' : '')
       + fmtHtml;
   }
@@ -934,11 +942,10 @@ var CreateFlow = (function () {
       subline = 'Live on ' + f.platform + ' · saved to library with full rationale and brief.';
     }
     return '<div class="cf-success">'
-      + '<div class="cf-success-ring">&#10003;</div>'
-      + '<h2>' + heading + '</h2>'
-      + '<p style="color:var(--muted);margin-bottom:8px;line-height:1.55;">' + subline + '</p>'
-      + '<p class="cf-success-stat">~' + elapsed + 's · ' + cfPrettyModality(f.modality) + ' · ' + (f.format || '') + '</p>'
-      + '<div style="display:flex;gap:10px;justify-content:center;margin-top:28px;flex-wrap:wrap;">'
+      + '<div class="cf-success-badge"><span class="cf-success-check">&#10003;</span><span class="cf-success-label">' + heading + '</span></div>'
+      + '<p style="color:var(--muted);margin-bottom:12px;line-height:1.6;">' + subline + '</p>'
+      + '<p class="cf-success-stat">' + cfPrettyModality(f.modality) + (f.format ? ' · ' + f.format : '') + ' · ' + elapsed + 's</p>'
+      + '<div class="cf-success-actions">'
       + '<button class="btn btn-primary" onclick="cfReset()">Create another</button>'
       + '<button class="btn btn-outline" onclick="cfOpenLibrary()">View library</button>'
       + '<button class="btn btn-ghost" onclick="setMode(\'home\')">Back to home</button>'
@@ -1334,7 +1341,7 @@ var CreateFlow = (function () {
   }
   function cfContinueLabel() {
     var f = cfFlow();
-    if (f.step === 4) return '✦ Generate';
+    if (f.step === 4) return 'Generate';
     return 'Continue';
   }
 
@@ -1367,28 +1374,28 @@ var CreateFlow = (function () {
     var publishCard = f.decisionMode === 'publish'
       ? cfRenderPublishNowPanel()
       : '<div class="cf-dec-card" onclick="cfOpenDecisionPublish()">'
-        + '<div class="cf-dec-card-icon">&#128640;</div>'
+        + '<div class="cf-dec-card-accent cf-dec-accent-publish"></div>'
         + '<div class="cf-dec-card-body">'
         + '<div class="cf-dec-card-title">Publish now</div>'
-        + '<div class="cf-dec-card-desc">Goes live immediately. Choose your exact time below.</div>'
+        + '<div class="cf-dec-card-desc">Schedule a go-live time and publish directly from here.</div>'
         + '</div>'
         + '<div class="cf-dec-card-arrow">&#8250;</div>'
         + '</div>';
 
     var campaignCard = '<div class="cf-dec-card" onclick="cfStartCampaignFromCreate()">'
-      + '<div class="cf-dec-card-icon">&#128200;</div>'
+      + '<div class="cf-dec-card-accent cf-dec-accent-campaign"></div>'
       + '<div class="cf-dec-card-body">'
       + '<div class="cf-dec-card-title">Add to campaign</div>'
-      + '<div class="cf-dec-card-desc">Turn this into a multi-platform push. Brief carries over.</div>'
+      + '<div class="cf-dec-card-desc">Extend this into a multi-platform campaign. Brief and assets carry over.</div>'
       + '</div>'
       + '<div class="cf-dec-card-arrow">&#8250;</div>'
       + '</div>';
 
     var draftCard = '<div class="cf-dec-card cf-dec-card-ghost" onclick="cfPublish(\'draft\')">'
-      + '<div class="cf-dec-card-icon">&#128203;</div>'
+      + '<div class="cf-dec-card-accent cf-dec-accent-draft"></div>'
       + '<div class="cf-dec-card-body">'
       + '<div class="cf-dec-card-title">Save as draft</div>'
-      + '<div class="cf-dec-card-desc">Decide later. Saved to your library for editing and publishing any time.</div>'
+      + '<div class="cf-dec-card-desc">Save to your library. Return to edit, schedule, or publish at any time.</div>'
       + '</div>'
       + '</div>';
 
@@ -1400,7 +1407,7 @@ var CreateFlow = (function () {
       + '<div class="cf-main cf-decision-wrap">'
       + '<div class="cf-decision">'
       + preview
-      + '<div class="cf-dec-heading">What would you like to do with this ' + cfPrettyModality(f.modality) + '?</div>'
+      + '<div class="cf-dec-heading">How would you like to proceed with this ' + cfPrettyModality(f.modality) + '?</div>'
       + '<div class="cf-dec-cards">'
       + publishCard
       + campaignCard
@@ -1504,7 +1511,7 @@ var CreateFlow = (function () {
 
     var footer = '<div class="cf-footer">'
       + '<button class="btn btn-outline"' + (f.step <= 1 ? ' disabled style="opacity:0.35;"' : '') + ' onclick="cfBack()">← Back</button>'
-      + '<div class="cf-footer-mid"><span class="cf-eta">&#10003; 5 steps to publish</span></div>'
+      + '<div class="cf-footer-mid"><span class="cf-eta">Step ' + f.step + ' of ' + CF_STEPS.length + ' &mdash; ' + CF_STEPS[f.step - 1] + '</span></div>'
       + continueSlot
       + '</div>';
 
