@@ -1,6 +1,6 @@
-/* Unified creation flow — type → platform → format → brief → generate → edit → publish */
+/* Unified creation flow — 5-step wizard: what → where → format → brief → generate */
 var CreateFlow = (function () {
-  var CF_STEPS = ['Type', 'Platform', 'Format', 'Brief', 'Generate', 'Edit', 'Publish'];
+  var CF_STEPS = ['What', 'Where', 'Format', 'Brief', 'Generate'];
   var CF_MODS = [
     { id: 'text', icon: '✍', name: 'Text', desc: 'Posts, captions, email' },
     { id: 'image', icon: '🖼', name: 'Image', desc: 'Feed, story, banners' },
@@ -621,15 +621,19 @@ var CreateFlow = (function () {
   function cfStepGenerateProgress() {
     var f = cfFlow();
     var phase = f.genPhase || 0;
+    var hasIntel = cfHasIntelligence();
+    var genSteps = hasIntel
+      ? CF_GEN_STEPS
+      : ['Applying brand kit…', 'Using brief context…', 'Generating variations…', 'Scoring by format fit…'];
     return '<div class="cf-gen-stage">'
       + '<div class="cf-gen-glow"></div>'
       + '<div class="cf-spin"></div>'
       + '<div class="cf-gen-title">Maker is creating…</div>'
-      + '<div class="cf-gen-sub">' + appState.createBrief.persona + ' · ' + f.platform + ' · ' + f.format + '</div>'
+      + '<div class="cf-gen-sub">' + (hasIntel ? appState.createBrief.persona + ' · ' : '') + f.platform + ' · ' + f.format + '</div>'
       + cfAppliedBar(f)
       + cfBriefSignalBar(true)
       + '<div class="cf-gen-steps">'
-      + CF_GEN_STEPS.map(function (s, i) {
+      + genSteps.map(function (s, i) {
           var cls = i < phase ? 'done' : i === phase ? 'active' : '';
           return '<div class="cf-gen-step ' + cls + '"><span class="cf-gen-step-dot"></span>' + s + '</div>';
         }).join('')
@@ -731,6 +735,13 @@ var CreateFlow = (function () {
   }
 
   function cfVariationCard(v, i, f) {
+    var hasIntel = cfHasIntelligence();
+    var pfHtml = hasIntel
+      ? '<span class="pf-chip ' + cfPfClass(v.pf) + '"><span class="pf-chip-dot"></span>' + v.pf + ' PF' + (v.pf >= 85 ? ' ★' : '') + '</span>'
+      : '<span class="pf-chip pill-muted" style="opacity:0.55;" title="Persona fit unavailable without intelligence"><span class="pf-chip-dot"></span>— PF</span>';
+    var rationaleHtml = hasIntel
+      ? '<div class="cf-rationale"><span>Why</span> ' + v.rationale + '</div>'
+      : '<div class="cf-rationale cf-rationale-neutral"><span>Note</span> Generated based on your brief</div>';
     var body;
     if (f.modality === 'text') {
       body = cfTextPostMockup(v, f);
@@ -743,10 +754,10 @@ var CreateFlow = (function () {
     }
     return '<div class="variation-card cf-var-card' + (f.variation === i ? ' selected' : '') + '" onclick="cfSelectVariation(' + i + ')">'
       + '<div class="flex-between" style="margin-bottom:10px;"><span style="font-weight:600;">Variation ' + v.label + '</span>'
-      + '<span class="pf-chip ' + cfPfClass(v.pf) + '"><span class="pf-chip-dot"></span>' + v.pf + ' PF' + (v.pf >= 85 ? ' ★' : '') + '</span></div>'
+      + pfHtml + '</div>'
       + body
       + '<div class="cf-storyboard" style="margin-top:10px;"><div class="cf-storyboard-label">Storyboard</div><div class="cf-storyboard-text">' + v.storyboard + '</div></div>'
-      + '<div class="cf-rationale"><span>Why</span> ' + v.rationale + '</div>'
+      + rationaleHtml
       + '<button class="btn btn-outline btn-sm" style="width:100%;margin-top:10px;" onclick="event.stopPropagation();cfSelectVariation(' + i + ')">' + (f.variation === i ? 'Selected ✓' : 'Select') + '</button></div>';
   }
 
@@ -770,11 +781,12 @@ var CreateFlow = (function () {
   }
   function cfStepGenerate() {
     var f = cfFlow();
-    if (!cfHasIntelligence()) return cfIntelGate();
+    /* No intelligence gate — generation always runs regardless of intel state */
     if (f.generating) return cfStepGenerateProgress();
+    var hasIntel = cfHasIntelligence();
     var vars = f.modality === 'image' ? CF_IMAGE_VARS : f.modality === 'video' ? CF_VIDEO_VARS : f.modality === 'audio' ? CF_AUDIO_VARS : CF_TEXT_VARS;
     return '<div class="cf-step-title">Pick a variation</div>'
-      + '<div class="cf-step-sub">3 options · persona-scored · storyboard + strategic rationale</div>'
+      + '<div class="cf-step-sub">' + (hasIntel ? '3 options · persona-scored · storyboard + strategic rationale' : '3 options · generated from your brief · storyboard included') + '</div>'
       + cfAppliedBar(f)
       + cfBriefSignalBar(true)
       + '<div class="variation-grid">' + vars.map(function (v, i) { return cfVariationCard(v, i, f); }).join('') + '</div>'
@@ -906,18 +918,30 @@ var CreateFlow = (function () {
   function cfStepSuccess() {
     var f = cfFlow();
     var elapsed = f.genStartedAt ? Math.round((Date.now() - f.genStartedAt) / 1000) : 28;
-    var modeLabel = f.publishMode === 'schedule' ? 'Scheduled for ' + appState.cfScheduleTime
-      : f.publishMode === 'campaign' ? 'Added to ' + appState.cfCampaign
-      : f.publishMode === 'draft' ? 'Saved as draft' : 'Published to ' + f.platform;
+    var campaignName = appState._lastCampaignName || appState.cfCampaign || 'campaign';
+    var heading, subline;
+    if (f.publishMode === 'draft') {
+      heading = 'Draft saved';
+      subline = 'Saved to your library — pick it up any time to publish or add to a campaign.';
+    } else if (f.publishMode === 'schedule') {
+      heading = 'Scheduled';
+      subline = 'Scheduled for ' + appState.cfScheduleTime + ' · will publish automatically.';
+    } else if (f.publishMode === 'campaign') {
+      heading = 'Added to campaign';
+      subline = 'Attached to <strong style="color:var(--text);">' + campaignName + '</strong> · ready for the campaign publish step.';
+    } else {
+      heading = 'Published!';
+      subline = 'Live on ' + f.platform + ' · saved to library with full rationale and brief.';
+    }
     return '<div class="cf-success">'
-      + '<div class="cf-success-ring">✓</div>'
-      + '<h2>' + (f.publishMode === 'draft' ? 'Draft saved' : f.publishMode === 'schedule' ? 'Scheduled' : f.publishMode === 'campaign' ? 'Added to campaign' : 'Live') + '</h2>'
-      + '<p style="color:var(--muted);margin-bottom:8px;">' + modeLabel + '</p>'
-      + '<p class="cf-success-stat">Created in ~' + elapsed + 's · ' + f.modality + ' · ' + f.format + '</p>'
-      + '<p style="font-size:12px;color:var(--muted);margin-top:8px;">Saved to Library with rationale, brief, and publish state.</p>'
-      + '<div style="display:flex;gap:10px;justify-content:center;margin-top:24px;">'
+      + '<div class="cf-success-ring">&#10003;</div>'
+      + '<h2>' + heading + '</h2>'
+      + '<p style="color:var(--muted);margin-bottom:8px;line-height:1.55;">' + subline + '</p>'
+      + '<p class="cf-success-stat">~' + elapsed + 's · ' + cfPrettyModality(f.modality) + ' · ' + (f.format || '') + '</p>'
+      + '<div style="display:flex;gap:10px;justify-content:center;margin-top:28px;flex-wrap:wrap;">'
       + '<button class="btn btn-primary" onclick="cfReset()">Create another</button>'
       + '<button class="btn btn-outline" onclick="cfOpenLibrary()">View library</button>'
+      + '<button class="btn btn-ghost" onclick="setMode(\'home\')">Back to home</button>'
       + '</div></div>';
   }
 
@@ -963,7 +987,22 @@ var CreateFlow = (function () {
     f.suggestedFormat = idx === cfSuggestedIndex(f.modality, f.platform);
     renderContent();
   };
-  window.cfSelectVariation = function (i) { cfFlow().variation = i; renderContent(); };
+  window.cfSelectVariation = function (i) {
+    var f = cfFlow();
+    f.variation = i;
+    renderContent(); /* shows "Selected ✓" immediately */
+    if (!f.generating && f.step === 5) {
+      /* Brief highlight window, then advance to decision screen */
+      setTimeout(function () {
+        var fc = cfFlow();
+        /* Guard: only advance if the user's selection hasn't changed and we're still at step 5 */
+        if (fc.variation === i && fc.step === 5 && !fc.generating) {
+          fc.step = 6;
+          renderContent();
+        }
+      }, 260);
+    }
+  };
   window.cfRegenerate = function () {
     var f = cfFlow();
     f.variation = null;
@@ -987,40 +1026,38 @@ var CreateFlow = (function () {
   }
   window.cfContinue = function () {
     var f = cfFlow();
+    /* Step 1 → 2: need a modality */
     if (f.step === 1 && !f.modality) return;
-    if (f.step === 1) {
-      f.step = 2;
-      renderContent(); return;
-    }
+    if (f.step === 1) { f.step = 2; renderContent(); return; }
+    /* Step 2 → 3: need a platform */
     if (f.step === 2 && !f.platform) return;
     if (f.step === 2) {
       f.step = 3;
       if (!f.format) cfApplyFormat(f, cfSuggestedIndex(f.modality, f.platform));
       renderContent(); return;
     }
+    /* Step 3 → 4: need a format */
     if (f.step === 3 && !f.format) return;
-    if (f.step === 3) {
-      f.step = 4;
-      renderContent(); return;
-    }
+    if (f.step === 3) { f.step = 4; renderContent(); return; }
+    /* Step 4 → 5: always kick off generation regardless of intel */
     if (f.step === 4) {
       f.step = 5; f.variation = null; f.genPhase = 0;
-      if (!cfHasIntelligence()) {
-        f.generating = false;
-        renderContent(); return;
-      }
       f.generating = true;
       if (!f.genStartedAt) f.genStartedAt = Date.now();
       renderContent(); cfRunGeneration(); return;
     }
-    if (f.step === 5 && f.variation === null) return;
-    if (f.step === 5) { f.step = 6; renderContent(); return; }
-    if (f.step === 6) { f.step = 7; renderContent(); return; }
+    /* Step 5 → decision: need a variation selected and generation complete */
+    if (f.step === 5 && (f.variation === null || f.generating)) return;
+    if (f.step === 5) {
+      /* step 6 = decision screen (Prompt 3 replaces with full overlay) */
+      f.step = 6; renderContent(); return;
+    }
   };
   window.cfBack = function () {
     var f = cfFlow();
     if (f.step <= 1) return;
-    if (f.step === 5) f.generating = false;
+    if (f.step === 5 || f.step === 6) f.generating = false;
+    if (f.step === 6) { f.step = 5; renderContent(); return; }
     f.step--; renderContent();
   };
   window.cfPublish = function (mode) {
@@ -1180,7 +1217,10 @@ var CreateFlow = (function () {
     }
     if (action === 'open' || action === 'regenerate') {
       appState.createFlow = {
-        step: action === 'regenerate' ? 5 : 6,
+        /* Both go to step 5 (Generate/pick variation):
+           'open' shows variations with one pre-selected so user can proceed to decision;
+           'regenerate' starts with generating=true and no selection */
+        step: 5,
         modality: item.modality,
         platform: item.platform,
         format: item.format,
@@ -1192,7 +1232,8 @@ var CreateFlow = (function () {
         editContent: item.previewText || '',
         published: false,
         publishMode: null,
-        genStartedAt: Date.now()
+        genStartedAt: Date.now(),
+        campaignBannerDismissed: false
       };
       nav('create-flow');
       if (action === 'regenerate') cfRunGeneration();
@@ -1251,38 +1292,36 @@ var CreateFlow = (function () {
 
   window.cfStartCampaignFromCreate = function () {
     var brief = appState.createBrief;
-    var campaignName = brief.goal || appState.cfCampaign || 'New Campaign';
-    if (!appState.campaigns) appState.campaigns = [];
-    appState.campaignUI = { mode: 'flow', selectedId: null };
-    appState.campaignFlow = {
-      step: 1,
-      name: campaignName,
-      objective: 'Launch',
-      startDate: '2026-07-01',
-      endDate: '2026-07-14',
-      platforms: [],
-      assetMix: [],
-      mixInitialized: false,
-      claraThinking: false,
-      claraSuggested: false,
-      brief: {
-        shared: {
-          objective: brief.goal || '',
-          persona: brief.persona || '',
-          message: brief.message || '',
-          proof: brief.proof || '',
-          cta: brief.cta || ''
-        },
-        overrides: {}
-      },
-      batchGenerating: false,
-      batchDone: 0,
-      batchTotal: 0,
-      generatedAssets: [],
-      editingAssetId: null,
-      editDraft: null
+    var f = cfFlow();
+    var vars = f.modality === 'image' ? CF_IMAGE_VARS : f.modality === 'video' ? CF_VIDEO_VARS : f.modality === 'audio' ? CF_AUDIO_VARS : CF_TEXT_VARS;
+    var v = f.variation !== null ? vars[f.variation] : vars[0];
+
+    /* Build seed asset from the selected variation */
+    var seedAsset = {
+      id: 'seed-' + Date.now(),
+      platform: f.platform || '',
+      modality: f.modality || 'text',
+      format: f.format || '',
+      label: cfPrettyModality(f.modality) + (f.platform ? ' for ' + f.platform : ''),
+      title: (brief.message || 'Generated content').substring(0, 72),
+      content: f.modality === 'text' ? (f.editContent || (v && v.text) || brief.message || '') : (brief.message || ''),
+      status: 'Ready',
+      approved: true,
+      scheduledDate: null,
+      fromCreate: true,
+      storyboard: v ? v.storyboard : '',
+      rationale: v ? v.rationale : ''
     };
-    nav('campaign');
+
+    /* Open campaign wizard in overlay mode, pre-filled from brief */
+    CampaignFlow.openFromCreate({
+      goal: brief.goal,
+      objective: brief.goal,
+      persona: brief.persona,
+      message: brief.message,
+      proof: brief.proof,
+      cta: brief.cta
+    }, seedAsset);
   };
 
   function cfCanContinue() {
@@ -1296,30 +1335,190 @@ var CreateFlow = (function () {
   function cfContinueLabel() {
     var f = cfFlow();
     if (f.step === 4) return '✦ Generate';
-    if (f.step === 5) return 'Continue to edit';
-    if (f.step === 6) return 'Continue to publish';
     return 'Continue';
   }
 
+  /* ── Real decision screen ────────────────────────────────── */
+  function cfRenderDecisionScreen() {
+    var f = cfFlow();
+    var vars = f.modality === 'image' ? CF_IMAGE_VARS : f.modality === 'video' ? CF_VIDEO_VARS : f.modality === 'audio' ? CF_AUDIO_VARS : CF_TEXT_VARS;
+    var v = f.variation !== null ? vars[f.variation] : vars[0];
+    var pf = v ? v.pf : '—';
+    var hasIntel = cfHasIntelligence();
+
+    /* Small condensed preview of the selected variation */
+    var preview = '';
+    if (v) {
+      var previewBody;
+      if (f.modality === 'text') previewBody = '<div class="cf-dec-preview-text">' + (v.text || '').substring(0, 160).replace(/\n/g, ' ') + (v.text && v.text.length > 160 ? '…' : '') + '</div>';
+      else if (f.modality === 'image') previewBody = cfImagePostMockup(v, f);
+      else if (f.modality === 'video') previewBody = cfVideoThumbnailMockup(v, 0, f);
+      else previewBody = '<div class="cf-dec-preview-text">' + v.title + ' · ' + v.dur + '</div>';
+      preview = '<div class="cf-dec-preview">'
+        + '<div class="cf-dec-preview-head">'
+        + '<span style="font-size:12px;font-weight:600;">Variation ' + v.label + ' selected</span>'
+        + (hasIntel ? '<span class="pf-chip ' + cfPfClass(pf) + '" style="transform:scale(0.88);"><span class="pf-chip-dot"></span>' + pf + ' PF</span>' : '')
+        + '</div>'
+        + '<div class="cf-dec-preview-body">' + previewBody + '</div>'
+        + '</div>';
+    }
+
+    /* Publish now action — expands inline date/time when clicked */
+    var publishCard = f.decisionMode === 'publish'
+      ? cfRenderPublishNowPanel()
+      : '<div class="cf-dec-card" onclick="cfOpenDecisionPublish()">'
+        + '<div class="cf-dec-card-icon">&#128640;</div>'
+        + '<div class="cf-dec-card-body">'
+        + '<div class="cf-dec-card-title">Publish now</div>'
+        + '<div class="cf-dec-card-desc">Goes live immediately. Choose your exact time below.</div>'
+        + '</div>'
+        + '<div class="cf-dec-card-arrow">&#8250;</div>'
+        + '</div>';
+
+    var campaignCard = '<div class="cf-dec-card" onclick="cfStartCampaignFromCreate()">'
+      + '<div class="cf-dec-card-icon">&#128200;</div>'
+      + '<div class="cf-dec-card-body">'
+      + '<div class="cf-dec-card-title">Add to campaign</div>'
+      + '<div class="cf-dec-card-desc">Turn this into a multi-platform push. Brief carries over.</div>'
+      + '</div>'
+      + '<div class="cf-dec-card-arrow">&#8250;</div>'
+      + '</div>';
+
+    var draftCard = '<div class="cf-dec-card cf-dec-card-ghost" onclick="cfPublish(\'draft\')">'
+      + '<div class="cf-dec-card-icon">&#128203;</div>'
+      + '<div class="cf-dec-card-body">'
+      + '<div class="cf-dec-card-title">Save as draft</div>'
+      + '<div class="cf-dec-card-desc">Decide later. Saved to your library for editing and publishing any time.</div>'
+      + '</div>'
+      + '</div>';
+
+    return '<div class="cf-screen">'
+      + '<div class="cf-topbar">'
+      + '<button class="app-topbar-back" onclick="cfConfirmExitWizard()">&#8592; Back to home</button>'
+      + '<div class="cf-brand">Clarity</div>'
+      + '<div class="cf-topbar-right"></div></div>'
+      + '<div class="cf-main cf-decision-wrap">'
+      + '<div class="cf-decision">'
+      + preview
+      + '<div class="cf-dec-heading">What would you like to do with this ' + cfPrettyModality(f.modality) + '?</div>'
+      + '<div class="cf-dec-cards">'
+      + publishCard
+      + campaignCard
+      + draftCard
+      + '</div>'
+      + '<button class="btn btn-ghost btn-sm" style="margin-top:20px;" onclick="cfBack()">&#8592; Back to variations</button>'
+      + '</div></div></div>';
+  }
+
+  function cfRenderPublishNowPanel() {
+    var f = cfFlow();
+    var now = new Date();
+    var pad = function(n) { return String(n).padStart(2,'0'); };
+    var defaultDate = now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + pad(now.getDate());
+    var defaultTime = pad(now.getHours()) + ':' + pad(now.getMinutes());
+    return '<div class="cf-dec-card cf-dec-card-expanded">'
+      + '<div class="cf-dec-card-expanded-title">&#128640; Confirm publish time</div>'
+      + '<div style="display:flex;gap:10px;margin:12px 0 16px;">'
+      + '<div class="cf-field" style="flex:1;"><label>Date</label><input type="date" id="cf-pub-date" value="' + (f.publishDate || defaultDate) + '" onchange="appState.createFlow.publishDate=this.value"></div>'
+      + '<div class="cf-field" style="flex:1;"><label>Time</label><input type="time" id="cf-pub-time" value="' + (f.publishTime || defaultTime) + '" onchange="appState.createFlow.publishTime=this.value"></div>'
+      + '</div>'
+      + '<div style="display:flex;gap:8px;">'
+      + '<button class="btn btn-primary" style="flex:1;" onclick="cfConfirmPublishNow()">&#10003; Publish now</button>'
+      + '<button class="btn btn-outline" onclick="cfCloseDecisionPublish()">Cancel</button>'
+      + '</div></div>';
+  }
+
+  window.cfOpenDecisionPublish = function() { cfFlow().decisionMode = 'publish'; renderContent(); };
+  window.cfCloseDecisionPublish = function() { cfFlow().decisionMode = null; renderContent(); };
+  window.cfConfirmPublishNow = function() {
+    var f = cfFlow();
+    var date = f.publishDate || '';
+    var time = f.publishTime || '';
+    var label = date && time ? date + ' at ' + time : 'Now';
+    appState.cfScheduleTime = label;
+    cfPublish('now');
+  };
+  window.cfOverlayBackdropClick = function(e) {
+    if (e.target === e.currentTarget) window.campaignCloseOverlay && window.campaignCloseOverlay();
+  };
+
+  /* ── Campaign overlay container ─────────────────────────── */
+  function cfRenderCampaignOverlay() {
+    return '<div class="cf-camp-overlay-backdrop" onclick="cfOverlayBackdropClick(event)">'
+      + '<div class="cf-camp-overlay-panel">'
+      + '<div class="cf-camp-overlay-body">' + screenCampaign() + '</div>'
+      + '</div></div>';
+  }
+
+  /* Exit confirmation — called when user hits Back to home from mid-wizard */
+  window.cfConfirmExitWizard = function () {
+    var f = cfFlow();
+    /* If nothing meaningful has been entered yet, exit silently */
+    if (f.step <= 1 && !f.modality) { setMode('home'); return; }
+    if (window.confirm('You\'ll lose this draft — continue?')) {
+      appState.createFlow.step = 1;
+      appState.createFlow.modality = null;
+      appState.createFlow.platform = null;
+      appState.createFlow.format = null;
+      appState.createFlow.generating = false;
+      appState.createFlow.variation = null;
+      setMode('home');
+    }
+  };
+
   function screenCreateFlow() {
     var f = cfFlow();
+
+    /* Success screen (step 8 — after decision/publish) */
     if (f.step === 8) {
-      return '<div class="cf-screen"><div class="cf-topbar"><div class="cf-brand">Clarity <span>Content Studio</span></div></div>'
+      return '<div class="cf-screen">'
+        + '<div class="cf-topbar">'
+        + '<button class="app-topbar-back" onclick="setMode(\'home\')">&#8592; Back to home</button>'
+        + '<div class="cf-brand">Clarity</div>'
+        + '<div class="cf-topbar-right"></div></div>'
         + '<div class="cf-main cf-success-wrap">' + cfStepSuccess() + '</div></div>';
     }
-    var content = f.step === 1 ? cfStepModality() : f.step === 2 ? cfStepPlatform() : f.step === 3 ? cfStepFormat()
-      : f.step === 4 ? cfStepBrief() : f.step === 5 ? cfStepGenerate() : f.step === 6 ? cfStepEdit() : cfStepPublish();
-    var footer = f.step < 7 ? '<div class="cf-footer">'
+
+    /* Decision screen (step 6) + optional campaign overlay on top */
+    if (f.step === 6) {
+      var decisionHtml = cfRenderDecisionScreen();
+      if (appState.cpOverlayOpen) {
+        /* Concatenate overlay AFTER the decision screen — it is position:fixed so DOM position is irrelevant */
+        return decisionHtml + cfRenderCampaignOverlay();
+      }
+      return decisionHtml;
+    }
+
+    /* Active wizard steps 1–5 */
+    var content = f.step === 1 ? cfStepModality()
+      : f.step === 2 ? cfStepPlatform()
+      : f.step === 3 ? cfStepFormat()
+      : f.step === 4 ? cfStepBrief()
+      : cfStepGenerate();
+
+    /* At step 5 (post-generation, picking a variation): clicking a card IS the continue action.
+       Replace the Continue button with a passive hint so the footer stays visually balanced. */
+    var continueSlot = (f.step === 5 && !f.generating)
+      ? '<span class="cf-step5-pick-hint">Select a variation to continue</span>'
+      : '<button class="btn btn-primary"' + (cfCanContinue() ? '' : ' disabled style="opacity:0.4;"') + ' onclick="cfContinue()">' + cfContinueLabel() + '</button>';
+
+    var footer = '<div class="cf-footer">'
       + '<button class="btn btn-outline"' + (f.step <= 1 ? ' disabled style="opacity:0.35;"' : '') + ' onclick="cfBack()">← Back</button>'
-      + '<div class="cf-footer-mid"><span class="cf-eta">⚡ ~30 sec to publish</span></div>'
-      + '<button class="btn btn-primary"' + (cfCanContinue() ? '' : ' disabled style="opacity:0.4;"') + ' onclick="cfContinue()">' + cfContinueLabel() + '</button>'
-      + '</div>' : '';
+      + '<div class="cf-footer-mid"><span class="cf-eta">&#10003; 5 steps to publish</span></div>'
+      + continueSlot
+      + '</div>';
+
     return '<div class="cf-screen">'
-      + '<div class="cf-topbar"><div class="cf-brand">Clarity <span>Content Studio</span></div>'
+      + '<div class="cf-topbar">'
+      + '<button class="app-topbar-back" onclick="cfConfirmExitWizard()">&#8592; Back to home</button>'
+      + '<div class="cf-brand">Clarity</div>'
       + '<div class="cf-topbar-right">'
       + '<button class="btn btn-outline btn-sm" onclick="cfOpenPrefs()">&#9881; Preferences</button>'
       + '</div></div>'
-      + '<div class="cf-body' + (appState.cfSidebarOpen ? '' : ' cf-sidebar-collapsed') + '"><div class="cf-main">' + (f.step > 1 ? cfStepper() : '') + content + '</div>' + cfIntelRail() + '</div>'
+      + '<div class="cf-body' + (appState.cfSidebarOpen ? '' : ' cf-sidebar-collapsed') + '">'
+      + '<div class="cf-main">' + cfStepper() + content + '</div>'
+      + cfIntelRail()
+      + '</div>'
       + footer + cfRenderPrefDrawer() + '</div>';
   }
 

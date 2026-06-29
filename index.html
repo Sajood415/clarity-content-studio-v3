@@ -35,31 +35,197 @@ a { text-decoration: none; color: inherit; }
   --danger: #f87171;
   --radius: 10px;
   --radius-sm: 6px;
-  --sidebar-w: 220px;
 }
 
-/* Shell */
-#app { display: flex; flex-direction: row; height: 100vh; background: var(--bg); color: var(--text); overflow: hidden; }
-#main { display: flex; flex-direction: column; flex: 1; min-width: 0; overflow: hidden; }
-#content { flex: 1; overflow-y: auto; overflow-x: hidden; background: var(--bg); }
+/* Shell — no sidebar, full screen */
+#app { height: 100vh; background: var(--bg); color: var(--text); }
+#content { height: 100vh; overflow-y: auto; overflow-x: hidden; background: var(--bg); }
 
-#sidebar {
-  width: var(--sidebar-w); min-width: var(--sidebar-w); height: 100vh;
-  background: var(--card); border-right: 1px solid var(--border);
-  display: flex; flex-direction: column; overflow-y: auto; padding: 0 0 12px; flex-shrink: 0;
+/* ============================================================
+   HOME LANDING
+   ============================================================ */
+.home-wrap {
+  display: flex; flex-direction: column; height: 100%; min-height: 100vh;
+  position: relative; background: var(--bg);
 }
-.sidebar-group-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 14px 16px 4px; }
-.sidebar-brand { padding: 22px 16px 18px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
-.sidebar-brand-name { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 700; color: var(--primary); line-height: 1; }
-.sidebar-brand-tag { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); margin-top: 6px; }
-.sidebar-brand-edition { display: inline-block; margin-top: 8px; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 20px; background: var(--primary-dim); color: var(--primary-hover); border: 1px solid rgba(99,102,241,0.25); }
-.sidebar-item { display: flex; align-items: center; gap: 10px; padding: 7px 16px; font-size: 13px; color: var(--muted); cursor: pointer; position: relative; transition: all 0.15s; }
-.sidebar-item:hover { background: var(--primary-dim); color: var(--text); }
-.sidebar-item.active { background: var(--primary-dim); color: var(--text); }
-.sidebar-item.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--primary); border-radius: 0 2px 2px 0; }
-.sidebar-item .icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
 
-/* Shared UI */
+/* Brand wordmark top-left */
+.home-brand { padding: 26px 32px; }
+.home-brand-name {
+  font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 700;
+  color: var(--primary); line-height: 1;
+}
+
+/* Centered nudge area */
+.home-center {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 0 32px 100px; text-align: center;
+}
+
+/* Entrance animation */
+@keyframes nudge-enter {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.home-nudge { max-width: 580px; animation: nudge-enter 0.5s cubic-bezier(.22,.68,0,1.2) both; }
+
+/* State A — strategy ready badge */
+.home-status {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 5px 14px; border-radius: 20px;
+  background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.3);
+  color: #34d399; font-size: 11px; font-weight: 600; margin-bottom: 22px;
+}
+.home-pulse-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: #34d399;
+  animation: home-pulse 2s ease infinite;
+}
+@keyframes home-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+/* State B — no-intel badge */
+.home-warn-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 5px 14px; border-radius: 20px;
+  background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3);
+  color: #f59e0b; font-size: 11px; font-weight: 600; margin-bottom: 22px;
+}
+
+.home-heading {
+  font-family: 'Cormorant Garamond', serif; font-size: 52px; font-weight: 600;
+  color: var(--text); line-height: 1.1; margin-bottom: 16px;
+}
+.home-sub {
+  font-size: 16px; color: var(--muted); line-height: 1.65; margin-bottom: 32px;
+  max-width: 480px; margin-left: auto; margin-right: auto;
+}
+.home-sub strong { color: var(--text); font-weight: 500; }
+
+/* CTA row */
+.home-actions {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  margin-bottom: 18px;
+}
+.btn-lg { padding: 12px 26px !important; font-size: 15px !important; }
+
+/* Campaigns link */
+.home-campaigns-link { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.home-campaigns-link a { color: var(--primary-hover); }
+.home-campaigns-link a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* Intelligence summary cards (State A only) */
+.home-intel-cards {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+  max-width: 700px; width: 100%; margin-top: 36px;
+  animation: nudge-enter 0.55s 0.12s cubic-bezier(.22,.68,0,1.2) both;
+}
+.home-intel-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px 18px; text-align: left;
+}
+.home-intel-card-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px;
+}
+.home-intel-card-val { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; line-height: 1.35; }
+.home-intel-card-sub { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+/* Intelligence toggle — bottom-left corner of home screen */
+.home-intel-toggle {
+  position: absolute; bottom: 28px; left: 28px;
+}
+.home-intel-toggle-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px;
+}
+.home-toggle-options { display: flex; flex-direction: column; gap: 4px; }
+.home-toggle-opt {
+  display: flex; align-items: center; gap: 8px; font-size: 12px;
+  color: var(--muted); cursor: pointer; padding: 5px 9px;
+  border-radius: var(--radius-sm); border: 1px solid transparent;
+  transition: all 0.15s; user-select: none;
+}
+.home-toggle-opt:hover { color: var(--text); background: var(--primary-dim); }
+.home-toggle-opt.active { color: var(--text); background: var(--primary-dim); border-color: rgba(99,102,241,0.3); }
+.home-toggle-radio-dot {
+  width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0;
+  border: 2px solid var(--border); display: flex; align-items: center;
+  justify-content: center; transition: border-color 0.15s;
+}
+.home-toggle-opt.active .home-toggle-radio-dot { border-color: var(--primary); }
+.home-toggle-opt.active .home-toggle-radio-dot::after {
+  content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--primary);
+}
+
+/* ============================================================
+   APP TOP BAR (wizard / library / campaign modes)
+   ============================================================ */
+.app-topbar {
+  position: sticky; top: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 26px; background: var(--card); border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.app-topbar-brand {
+  font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700; color: var(--primary);
+}
+.app-topbar-back {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 13px;
+  color: var(--muted); cursor: pointer; padding: 6px 12px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: none; transition: all 0.15s;
+}
+.app-topbar-back:hover { color: var(--text); border-color: var(--primary); }
+
+/* ============================================================
+   CAMPAIGN OVERLAY (slides over wizard step 6)
+   ============================================================ */
+.cf-camp-overlay-backdrop {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(8,12,24,0.78);
+  display: flex; align-items: stretch; justify-content: flex-end;
+  animation: overlay-backdrop-in 0.22s ease;
+}
+@keyframes overlay-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+.cf-camp-overlay-panel {
+  width: 88%; max-width: 1000px; height: 100%;
+  background: var(--bg);
+  display: flex; flex-direction: column; overflow: hidden;
+  border-left: 1px solid var(--border);
+  box-shadow: -16px 0 56px rgba(0,0,0,0.55);
+  animation: overlay-slide-in 0.3s cubic-bezier(.22,.68,0,1.05) both;
+}
+@keyframes overlay-slide-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+/* Overlay body: flex column so the cf-screen fills it and internal scroll works */
+.cf-camp-overlay-body {
+  flex: 1; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+/* Override cf-screen defaults inside overlay so topbar/footer stay fixed and only .cf-body scrolls */
+.cf-camp-overlay-body .cf-screen {
+  flex: 1; min-height: 0; display: flex; flex-direction: column;
+}
+.cf-camp-overlay-body .cf-body {
+  flex: 1; min-height: 0;
+}
+/* Ensure the campaign main area scrolls independently inside the panel */
+.cf-camp-overlay-body .cp-main {
+  overflow-y: auto; height: 100%;
+}
+/* Close X button in overlay topbar */
+.cf-overlay-close-x {
+  width: 32px; height: 32px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--muted); font-size: 16px; cursor: pointer;
+  transition: all 0.15s; background: none;
+}
+.cf-overlay-close-x:hover { color: var(--danger); border-color: var(--danger); background: rgba(248,113,113,0.08); }
+
+/* ============================================================
+   SHARED UI
+   ============================================================ */
 .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
 .pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
 .pill-green { background: rgba(52,211,153,0.12); color: #34d399; }
@@ -135,40 +301,6 @@ a { text-decoration: none; color: inherit; }
 .evidence-text { font-size: 12px; color: var(--text); line-height: 1.5; }
 .evidence-source { font-size: 10px; color: var(--muted); margin-top: 4px; }
 
-/* Intelligence mode toggle (sidebar bottom) */
-.sidebar-intel-section {
-  margin-top: auto; padding: 14px 14px 4px; border-top: 1px solid var(--border);
-}
-.sidebar-intel-title {
-  font-size: 10px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.1em; color: var(--muted); margin-bottom: 10px;
-}
-.sidebar-intel-options { display: flex; flex-direction: column; gap: 6px; }
-.sib-radio-label {
-  display: flex; align-items: center; gap: 8px; padding: 7px 10px;
-  border-radius: var(--radius-sm); cursor: pointer; font-size: 12px;
-  color: var(--muted); border: 1px solid transparent;
-  transition: all 0.15s;
-}
-.sib-radio-label:hover { background: var(--primary-dim); color: var(--text); }
-.sib-radio-label.active {
-  background: var(--primary-dim); color: var(--text);
-  border-color: rgba(99,102,241,0.3);
-}
-.sib-radio-label input[type="radio"] { display: none; }
-.sib-radio-dot {
-  width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
-  border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
-  transition: border-color 0.15s;
-}
-.sib-radio-label.active .sib-radio-dot {
-  border-color: var(--primary);
-}
-.sib-radio-label.active .sib-radio-dot::after {
-  content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--primary);
-}
-.sib-radio-icon { font-size: 13px; }
-
 /* Approvals (Audio) */
 .approval-rail { display: flex; flex-direction: column; gap: 8px; }
 .approval-step { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; background: var(--card2); border: 1px solid var(--border); }
@@ -190,7 +322,7 @@ a { text-decoration: none; color: inherit; }
 .audio-ch-title { flex: 1; font-size: 12px; color: var(--text); }
 .audio-ch-dur { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--muted); }
 
-/* Create home */
+/* Create home (used by create-flow.js internals) */
 .create-hero { max-width: 960px; margin: 0 auto; }
 .create-status { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 20px; background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.3); color: #34d399; font-size: 11px; font-weight: 600; margin-bottom: 16px; }
 .create-status-dot { width: 7px; height: 7px; border-radius: 50%; background: #34d399; animation: create-pulse 2s ease infinite; }
@@ -220,10 +352,7 @@ a { text-decoration: none; color: inherit; }
 <!-- /studio-text/  /studio-image/  /studio-video/  /studio-audio/ -->
 <!-- ===================== APP SHELL ===================== -->
 <div id="app">
-  <div id="sidebar"></div>
-  <div id="main">
-    <div id="content"></div>
-  </div>
+  <div id="content"></div>
 </div>
 
 <script>
@@ -248,7 +377,8 @@ var CLARITY_SAMPLE_INTELLIGENCE = {
 
 /* ===================== STATE ===================== */
 var appState = {
-  screen: 'create-flow',
+  mode: 'home',
+  cpOverlayOpen: false,
   createBrief: {
     goal: 'Drive weekend pre-orders',
     message: 'Sourdough Saturday is back — 72-hour cold ferment, stone-baked, limited batch. Craft over convenience.',
@@ -258,91 +388,156 @@ var appState = {
   intelligence: JSON.parse(JSON.stringify(CLARITY_SAMPLE_INTELLIGENCE))
 };
 
-function nav(screen) {
-  appState.screen = screen;
-  renderSidebar();
-  renderContent();
-  try { history.replaceState(null, '', '#/enterprise/' + screen); } catch(e) {}
+/* ===================== MODE SYSTEM ===================== */
+function setMode(mode) {
+  appState.mode = mode;
+  /* Keep appState.screen in sync for backward compat with module files */
+  if (mode === 'wizard') appState.screen = 'create-flow';
+  else if (mode === 'library') appState.screen = 'library';
+  else if (mode === 'campaign') appState.screen = 'campaign';
+  else appState.screen = 'home';
+  renderApp();
 }
 
-var STUDIO_NAV = [
-  { group: 'Content Engine' },
-  { id: 'create-flow', icon: '&#10022;', label: 'Create' },
-  { id: 'campaign',    icon: '&#128640;', label: 'Campaign' },
-  { id: 'library',     icon: '&#128203;', label: 'Library' },
-];
+/* Compatibility shim for module files that call nav() */
+function nav(screen) {
+  if (screen === 'create-flow') setMode('wizard');
+  else if (screen === 'library' || screen === 'history') setMode('library');
+  else if (screen === 'campaign') setMode('campaign');
+  else setMode('home');
+}
 
+/* ===================== INTELLIGENCE TOGGLE ===================== */
 function clarityGetIntelMode() {
   return localStorage.getItem('clarity_intel_mode') || 'on';
 }
+
 window.claritySetIntelMode = function(mode) {
   localStorage.setItem('clarity_intel_mode', mode);
   appState.intelligence = mode === 'off' ? null : JSON.parse(JSON.stringify(CLARITY_SAMPLE_INTELLIGENCE));
-  renderSidebar();
-  renderContent();
+  renderApp();
 };
 
-function renderSidebar() {
-  var mode = clarityGetIntelMode();
-  var html = '<div class="sidebar-brand">'
-    + '<div class="sidebar-brand-name">Clarity</div>'
-    + '</div>';
-  STUDIO_NAV.forEach(function(item) {
-    if (item.group) {
-      html += '<div class="sidebar-group-label">' + item.group + '</div>';
-    } else {
-      var active = appState.screen === item.id ? ' active' : '';
-      html += '<div class="sidebar-item' + active + '" onclick="nav(\'' + item.id + '\')">'
-            + '<span class="icon">' + item.icon + '</span>' + item.label + '</div>';
-    }
-  });
-  // Intelligence mode toggle — persists across refresh
-  html += '<div class="sidebar-intel-section">'
-    + '<div class="sidebar-intel-title">Intelligence</div>'
-    + '<div class="sidebar-intel-options">'
-    + '<label class="sib-radio-label' + (mode === 'on' ? ' active' : '') + '" onclick="claritySetIntelMode(\'on\')">'
-    + '<input type="radio" name="clarity_intel" value="on"' + (mode === 'on' ? ' checked' : '') + '>'
-    + '<span class="sib-radio-dot"></span>'
-    + '<span class="sib-radio-icon">&#9679;</span> With Intelligence'
+/* ===================== HOME SCREEN ===================== */
+function screenHome() {
+  var intel = appState.intelligence;
+  var intelMode = clarityGetIntelMode();
+  var campaigns = appState.campaigns || [];
+
+  /* ---- Intelligence toggle (bottom-left) ---- */
+  var toggleHtml = '<div class="home-intel-toggle">'
+    + '<div class="home-intel-toggle-label">Intelligence</div>'
+    + '<div class="home-toggle-options">'
+    + '<label class="home-toggle-opt' + (intelMode === 'on' ? ' active' : '') + '" onclick="claritySetIntelMode(\'on\')">'
+    + '<span class="home-toggle-radio-dot"></span>With Intelligence'
     + '</label>'
-    + '<label class="sib-radio-label' + (mode === 'off' ? ' active' : '') + '" onclick="claritySetIntelMode(\'off\')">'
-    + '<input type="radio" name="clarity_intel" value="off"' + (mode === 'off' ? ' checked' : '') + '>'
-    + '<span class="sib-radio-dot"></span>'
-    + '<span class="sib-radio-icon">&#9675;</span> Without Intelligence'
+    + '<label class="home-toggle-opt' + (intelMode === 'off' ? ' active' : '') + '" onclick="claritySetIntelMode(\'off\')">'
+    + '<span class="home-toggle-radio-dot"></span>Without Intelligence'
     + '</label>'
     + '</div>'
     + '</div>';
-  document.getElementById('sidebar').innerHTML = html;
+
+  var nudgeHtml;
+  var cardsHtml = '';
+
+  if (intel) {
+    /* ---- State A: Strategy exists ---- */
+    var personaName = intel.persona ? intel.persona.name : 'your audience';
+    var marketTrend = intel.market ? intel.market.trend.split('·')[0].trim() : 'your market';
+
+    nudgeHtml = '<div class="home-nudge">'
+      + '<div class="home-status"><span class="home-pulse-dot"></span>Strategy ready</div>'
+      + '<h1 class="home-heading">Your strategy is ready.</h1>'
+      + '<p class="home-sub">You\'re targeting <strong>' + personaName + '</strong> in the <strong>' + marketTrend + '</strong> space. Want me to suggest what to create first?</p>'
+      + '<div class="home-actions">'
+      + '<button class="btn btn-primary btn-lg" onclick="setMode(\'wizard\')">Yes, let\'s create</button>'
+      + '<button class="btn btn-outline" onclick="setMode(\'library\')">Browse library</button>'
+      + '</div>'
+      + (campaigns.length
+          ? '<div class="home-campaigns-link">You have ' + campaigns.length + ' campaign' + (campaigns.length === 1 ? '' : 's') + ' — <a href="#" onclick="setMode(\'campaign\'); return false;">view campaigns</a></div>'
+          : '')
+      + '</div>';
+
+    /* Read-only intel summary cards */
+    cardsHtml = '<div class="home-intel-cards">'
+      + '<div class="home-intel-card">'
+      + '<div class="home-intel-card-label">Persona</div>'
+      + '<div class="home-intel-card-val">' + intel.persona.name + '</div>'
+      + '<div class="home-intel-card-sub">' + intel.persona.seg + '</div>'
+      + '</div>'
+      + '<div class="home-intel-card">'
+      + '<div class="home-intel-card-label">Market Signal</div>'
+      + '<div class="home-intel-card-val">' + intel.market.trend + '</div>'
+      + '<div class="home-intel-card-sub">' + intel.market.gap + '</div>'
+      + '</div>'
+      + '<div class="home-intel-card">'
+      + '<div class="home-intel-card-label">Consumer Trigger</div>'
+      + '<div class="home-intel-card-val">' + intel.consumer.trigger.split('.')[0] + '.</div>'
+      + '<div class="home-intel-card-sub">' + intel.consumer.research + '</div>'
+      + '</div>'
+      + '</div>';
+
+  } else {
+    /* ---- State B: No intelligence ---- */
+    nudgeHtml = '<div class="home-nudge">'
+      + '<div class="home-warn-badge">No strategy loaded</div>'
+      + '<h1 class="home-heading">What do you want to create?</h1>'
+      + '<p class="home-sub">You haven\'t completed your research yet. You can still create content, but results will be sharper with strategy context.</p>'
+      + '<div class="home-actions">'
+      + '<button class="btn btn-primary btn-lg" onclick="setMode(\'wizard\')">Let\'s create</button>'
+      + '<button class="btn btn-ghost" onclick="claritySetIntelMode(\'on\')">Set up intelligence first</button>'
+      + '</div>'
+      + '</div>';
+  }
+
+  return '<div class="home-wrap">'
+    + '<div class="home-brand"><span class="home-brand-name">Clarity</span></div>'
+    + '<div class="home-center">' + nudgeHtml + cardsHtml + '</div>'
+    + toggleHtml
+    + '</div>';
 }
 
-var STUDIO_SCREEN_IDS = ['create-flow', 'campaign', 'library', 'history'];
-
-function renderContent() {
+/* ===================== RENDER DISPATCHER ===================== */
+function renderApp() {
   var el = document.getElementById('content');
-  var html = (appState.screen === 'library' || appState.screen === 'history') ? screenLibrary()
-    : appState.screen === 'campaign' ? screenCampaign()
-    : screenCreateFlow();
-  el.innerHTML = html;
+  var mode = appState.mode;
+
+  if (mode === 'home') {
+    el.innerHTML = screenHome();
+    return;
+  }
+
+  if (mode === 'wizard') {
+    /* screenCreateFlow() renders its own topbar with cfConfirmExitWizard back button */
+    el.innerHTML = screenCreateFlow();
+    return;
+  }
+
+  /* Library and campaign share the same topbar pattern */
+  var topbar = '<div class="app-topbar">'
+    + '<span class="app-topbar-brand">Clarity</span>'
+    + '<button class="app-topbar-back" onclick="setMode(\'home\')">&#8592; Back to home</button>'
+    + '</div>';
+
+  if (mode === 'library') {
+    el.innerHTML = topbar + screenLibrary();
+  } else if (mode === 'campaign') {
+    el.innerHTML = topbar + screenCampaign();
+  }
 }
 
+/* renderContent() alias — module files call this directly to trigger re-renders */
+window.renderContent = renderApp;
+
+/* ===================== INIT ===================== */
 function init() {
-  // Apply saved intelligence mode before first render
+  /* Restore intelligence toggle from localStorage */
   if (clarityGetIntelMode() === 'off') {
     appState.intelligence = null;
   }
-  var h = window.location.hash;
-  if (h && h.startsWith('#/')) {
-    var parts = h.slice(2).split('/');
-    if (parts.length >= 2) {
-      var screen = parts[1];
-      if (screen === 'history') screen = 'library';
-      if (parts[0] === 'smb' || STUDIO_SCREEN_IDS.indexOf(screen) === -1) screen = 'create-flow';
-      nav(screen);
-      return;
-    }
-  }
-  renderSidebar();
-  renderContent();
+  /* Always boot to home — no hash routing in v3 */
+  appState.mode = 'home';
+  renderApp();
 }
 window.addEventListener('load', init);
 

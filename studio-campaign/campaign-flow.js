@@ -481,7 +481,21 @@ var CampaignFlow = (function () {
   function cpStepPlatforms() {
     var f = cpFlow();
     var claraBadge = f.claraSuggested ? '<span class="clara-badge">\u2736 Suggested by Clara</span>' : '';
+    var prefillBanner = f.prefilledFromCreate
+      ? '<div class="cp-prefill-banner">'
+        + '<span class="pill pill-green" style="margin-right:8px;">&#10003; Brief pre-filled from your content</span>'
+        + 'Campaign name, objective, and messaging were carried over. Just pick your platforms.'
+        + '</div>'
+      : '';
+    var seedBadge = f.seedAsset
+      ? '<div class="cp-seed-asset-note">'
+        + '<span class="pill pill-indigo" style="margin-right:6px;">&#10022; Asset 1 ready</span>'
+        + '<span style="font-size:12px;color:var(--muted);">Your <strong style="color:var(--text);">' + (f.seedAsset.modality || 'content') + '</strong> from the create flow is already attached as the first campaign asset.</span>'
+        + '</div>'
+      : '';
     return '<div class="cp-step-title">Platforms' + claraBadge + '</div>'
+      + prefillBanner
+      + seedBadge
       + '<div class="cp-step-sub">Pick one or more channels for this campaign.</div>'
       + '<div class="platform-tile-grid">'
       + CP_PLATFORMS.map(function (p) {
@@ -1477,7 +1491,10 @@ var CampaignFlow = (function () {
 
   window.campaignBack = function () {
     var f = cpFlow();
-    if (f.step > 1) {
+    var isOverlay = !!appState.cpOverlayOpen;
+    /* In overlay mode Step 2 is the first reachable step — never go to Step 1 */
+    var floor = isOverlay ? 2 : 1;
+    if (f.step > floor) {
       if (f.step === 6) f.intelBannerPending = false;
       f.step--;
       renderContent();
@@ -1693,9 +1710,34 @@ var CampaignFlow = (function () {
           + '</ul>')
       + '</div>'
       + '</div>';
+    /* ── Scheduled timeline: assets sorted by date ── */
+    var scheduledAssets = (c.assets || []).filter(function (a) { return !!a.scheduledDate; });
+    scheduledAssets.sort(function (a, b) { return a.scheduledDate < b.scheduledDate ? -1 : a.scheduledDate > b.scheduledDate ? 1 : 0; });
+    var byDate = {};
+    var dateOrder = [];
+    scheduledAssets.forEach(function (a) {
+      if (!byDate[a.scheduledDate]) { byDate[a.scheduledDate] = []; dateOrder.push(a.scheduledDate); }
+      byDate[a.scheduledDate].push(a);
+    });
+    var timelineHtml = dateOrder.length
+      ? dateOrder.map(function (d) {
+          return '<div class="cp-timeline-day">'
+            + '<div class="cp-timeline-date">' + cpFmtDate(d) + '</div>'
+            + '<div class="cp-timeline-posts">'
+            + byDate[d].map(function (a) {
+                return '<div class="cp-timeline-post">'
+                  + '<span class="pill pill-indigo cp-timeline-plat">' + a.platform + '</span>'
+                  + '<span class="cp-timeline-title">' + (a.label || a.title || '').substring(0, 60) + '</span>'
+                  + (a.approved ? '<span class="pill pill-green" style="font-size:10px;">Approved</span>' : '<span class="pill pill-muted" style="font-size:10px;">Pending</span>')
+                  + '</div>';
+              }).join('')
+            + '</div></div>';
+        }).join('')
+      : '<div class="cf-history-empty" style="padding:16px 0 6px;">No assets have been scheduled yet.</div>';
+
     return '<div class="screen"><div class="flex-between" style="margin-bottom:18px;">'
       + '<div><h1 class="screen-title">' + c.name + sampleBadge + '</h1><p class="screen-sub">' + c.goal + ' · ' + cpFmtDate(c.startDate) + (c.startTime ? ' ' + cpFmtTime(c.startTime) : '') + ' → ' + cpFmtDate(c.endDate) + (c.endTime ? ' ' + cpFmtTime(c.endTime) : '') + '</p></div>'
-      + '<div style="display:flex;align-items:center;gap:8px;"><button class="btn btn-outline" onclick="campaignBackHome()">← Campaigns</button><button class="btn btn-primary" onclick="campaignStartFlow()">+ New campaign</button></div>'
+      + '<div style="display:flex;align-items:center;gap:8px;"><button class="btn btn-outline" onclick="campaignBackHome()">&#8592; Campaigns</button></div>'
       + '</div>'
       + '<div class="cp-detail-kpis cp-detail-kpis-wide">'
       + '<div class="card"><div class="label">Status</div>'
@@ -1714,6 +1756,9 @@ var CampaignFlow = (function () {
         + '<div><span class="cp-brief-key">Message</span>' + (brief.message || '—') + '</div>'
         + '<div class="cp-row" style="margin-top:8px;"><div><span class="cp-brief-key">Proof</span>' + (brief.proof || '—') + '</div>'
         + '<div><span class="cp-brief-key">CTA</span>' + (brief.cta || '—') + '</div></div></div></div>' : '')
+      + '<div class="card" style="margin-top:12px;"><div class="label">Scheduled timeline</div>'
+      + '<div class="cp-timeline">' + timelineHtml + '</div>'
+      + '</div>'
       + '<div class="card" style="margin-top:12px;"><div class="label">All posts by platform</div>'
       + '<div class="cp-detail-platform-sections">' + platformSections + '</div>'
       + '</div></div>';
@@ -1721,18 +1766,21 @@ var CampaignFlow = (function () {
   function cpScreenHome() {
     var campaigns = appState.campaigns || [];
     var sample = CP_SAMPLE_CAMPAIGNS;
-    var header = '<div class="flex-between" style="margin-bottom:18px;">'
-      + '<div><h1 class="screen-title">Campaigns</h1><p class="screen-sub">Plan, generate, edit, and publish campaign assets in one flow</p></div>'
-      + '<div style="display:flex;align-items:center;gap:8px;">'
-      + '<button class="btn btn-primary" onclick="campaignStartFlow()">+ Create campaign</button>'
-      + '</div></div>';
+    var createHint = '<div class="cp-create-hint">'
+      + '<span style="font-size:13px;color:var(--muted);">To start a new campaign, create content and choose <strong style="color:var(--text);">Add to campaign</strong> — brief and assets carry over automatically.</span>'
+      + '<button class="btn btn-outline btn-sm" style="margin-left:12px;flex-shrink:0;" onclick="setMode(\'home\')">&#8592; Go to create</button>'
+      + '</div>';
+    var header = '<div class="flex-between" style="margin-bottom:12px;">'
+      + '<div><h1 class="screen-title">Campaigns</h1><p class="screen-sub">Your campaigns — view, review, and track performance</p></div>'
+      + '</div>'
+      + createHint;
     if (!campaigns.length) {
       return '<div class="screen">' + header
         + '<div class="cp-home-hero">'
         + '<div class="cp-home-hero-title">No campaigns yet</div>'
-        + '<p class="cp-home-hero-sub">Start your first campaign to coordinate goals, channel mix, asset generation, editing, and scheduling from one place.</p>'
+        + '<p class="cp-home-hero-sub">Create a piece of content, then choose <em>Add to campaign</em> on the decision screen to start your first campaign.</p>'
         + '</div>'
-        + '<div class="label" style="margin-top:16px;">Sample campaigns</div>'
+        + '<div class="label" style="margin-top:16px;">Sample campaigns (for reference)</div>'
         + '<div class="cp-campaign-list">'
         + sample.map(function (c) {
             var isLive = c.status === 'Live';
@@ -1824,6 +1872,7 @@ var CampaignFlow = (function () {
 
   function cpScreenFlow() {
     var f = cpFlow();
+    var isOverlay = !!appState.cpOverlayOpen;
     var content = f.step === 1 ? cpStepGoalTiming()
       : f.step === 2 ? cpStepPlatforms()
       : f.step === 3 ? cpStepSeries()
@@ -1832,14 +1881,28 @@ var CampaignFlow = (function () {
       : f.step === 6 ? cpStepGenerate()
       : f.step === 7 ? cpStepEdit()
       : cpStepPublish();
+
+    var topbar = isOverlay
+      ? '<div class="cf-topbar">'
+        + '<button class="app-topbar-back" onclick="campaignCloseOverlay()">&#8592; Back to your content</button>'
+        + '<div style="font-size:13px;color:var(--muted);font-weight:500;">' + (f.name || 'New campaign') + '</div>'
+        + '<div class="cf-topbar-right">'
+        + '<button class="cf-overlay-close-x" onclick="campaignCloseOverlay()" title="Close campaign setup">&#x2715;</button>'
+        + '</div></div>'
+      : '<div class="cf-topbar"><div class="cf-brand">Clarity <span>Campaign</span></div>'
+        + '<div class="cf-topbar-right"></div></div>';
+
+    var endBtn = isOverlay
+      ? '<button class="btn btn-primary" onclick="campaignCompleteFromCreate()">&#10003; Done — save campaign</button>'
+      : '<button class="btn btn-outline" onclick="campaignBackHome()">Back to campaigns</button>';
+
     return '<div class="cf-screen">'
-      + '<div class="cf-topbar"><div class="cf-brand">Clarity <span>Campaign</span></div>'
-      + '<div class="cf-topbar-right"></div></div>'
+      + topbar
       + '<div class="cf-body cp-flow-body' + (appState.cpSidebarOpen ? '' : ' cf-sidebar-collapsed') + '"><div class="cp-main">' + cpStepper() + content + '</div>' + cpIntelRail() + '</div>'
       + '<div class="cf-footer">'
-      + '<button class="btn btn-outline"' + (f.step <= 1 ? ' disabled style="opacity:0.35;"' : '') + ' onclick="campaignBack()">← Back</button>'
-      + '<div class="cf-footer-mid"><span class="cf-eta">Campaign flow · 8 steps</span></div>'
-      + (f.step < 8 ? '<button class="btn btn-primary"' + (canContinue() ? '' : ' disabled style="opacity:0.4;"') + ' onclick="campaignContinue()">' + cpContinueLabel() + '</button>' : '<button class="btn btn-outline" onclick="campaignBackHome()">Back to campaigns</button>')
+      + '<button class="btn btn-outline"' + (f.step <= (isOverlay ? 2 : 1) ? ' disabled style="opacity:0.35;"' : '') + ' onclick="campaignBack()">← Back</button>'
+      + '<div class="cf-footer-mid"><span class="cf-eta">Campaign · ' + CP_STEPS.length + ' steps</span></div>'
+      + (f.step < 8 ? '<button class="btn btn-primary"' + (canContinue() ? '' : ' disabled style="opacity:0.4;"') + ' onclick="campaignContinue()">' + cpContinueLabel() + '</button>' : endBtn)
       + '</div>'
       + '</div>';
   }
@@ -1857,7 +1920,121 @@ var CampaignFlow = (function () {
     return cpScreenHome();
   }
 
-  return { init: init, screenCampaign: screenCampaign };
+  /* ── Called by create-flow.js to open the campaign wizard pre-filled ── */
+  function openFromCreate(briefData, seedAsset) {
+    var today = cpTodayStr();
+    var endDate = cpAddDays(today, 13);
+    var words = ((briefData.message || briefData.goal || 'Campaign') + '').trim().split(/\s+/);
+    var campaignName = words.slice(0, 6).join(' ') + (words.length > 6 ? '\u2026' : '');
+
+    var series0 = cpFreshSeries(campaignName);
+    /* Seed asset is pre-approved and attached to Series 1's generated list */
+
+    appState.campaignUI = { mode: 'flow', selectedId: null };
+    appState.campaignFlow = {
+      step: 2, /* Skip Step 1 — Goal & Timing is pre-filled */
+      name: campaignName,
+      objective: 'Launch',
+      startDate: today, startTime: '09:00',
+      endDate: endDate, endTime: '17:00',
+      platforms: [],
+      series: [series0],
+      activeSeriesIdx: 0,
+      mixInitialized: false,
+      claraThinking: false,
+      claraSuggested: false,
+      intelBannerPending: false,
+      prefilledFromCreate: true,
+      seedAsset: seedAsset || null,
+      brief: {
+        shared: {
+          objective: briefData.goal || briefData.objective || '',
+          persona: briefData.persona || '',
+          message: briefData.message || '',
+          proof: briefData.proof || '',
+          cta: briefData.cta || ''
+        },
+        overrides: {}
+      },
+      batchGenerating: false,
+      batchDone: 0, batchTotal: 0,
+      batchSeriesProgress: {},
+      /* Seed asset pre-loaded as first generated asset — already approved */
+      generatedAssets: seedAsset ? [seedAsset] : [],
+      editingAssetId: null,
+      editDraft: null
+    };
+    appState.cpOverlayOpen = true;
+    renderContent();
+  }
+
+  /* ── Close overlay (called by the ← Back button or backdrop click) ── */
+  window.campaignCloseOverlay = function () {
+    var f = cpFlow();
+    var platformsSelected = f && f.platforms && f.platforms.length > 0;
+
+    if (!platformsSelected) {
+      /* Nothing was configured — confirm discard */
+      if (!window.confirm('Discard campaign setup and just save as draft instead?')) return;
+      appState.cpOverlayOpen = false;
+      appState.campaignFlow = cpFreshFlow(appState);
+      appState.campaignUI = { mode: 'home', selectedId: null };
+      /* Save the create-flow content as draft */
+      if (window.cfPublish) window.cfPublish('draft');
+      else renderContent();
+      return;
+    }
+
+    /* Platforms were selected — treat as "added to campaign" */
+    appState.cpOverlayOpen = false;
+    appState.campaignFlow = cpFreshFlow(appState);
+    appState.campaignUI = { mode: 'home', selectedId: null };
+    if (window.cfPublish && appState.createFlow && appState.createFlow.step < 8) {
+      window.cfPublish('campaign');
+    } else {
+      renderContent();
+    }
+  };
+
+  /* ── Called when user completes campaign wizard inside the overlay ── */
+  window.campaignCompleteFromCreate = function () {
+    var f = cpFlow();
+    if (!appState.campaigns) appState.campaigns = [];
+    /* Save the campaign */
+    var campaign = {
+      id: 'camp-' + Date.now(),
+      name: f.name,
+      goal: f.objective,
+      startDate: f.startDate, startTime: f.startTime,
+      endDate: f.endDate, endTime: f.endTime,
+      platforms: f.platforms.slice(),
+      brief: { shared: f.brief.shared, overrides: f.brief.overrides },
+      status: 'Draft',
+      assets: f.generatedAssets || [],
+      totalAssets: (f.generatedAssets || []).length
+    };
+    appState.campaigns.unshift(campaign);
+    /* Save the campaign name for the success screen */
+    appState._lastCampaignName = f.name;
+    /* Close overlay and reset */
+    appState.cpOverlayOpen = false;
+    appState.campaignFlow = cpFreshFlow(appState);
+    appState.campaignUI = { mode: 'home', selectedId: null };
+    /* Advance create flow to success with "campaign" publish mode */
+    if (window.cfPublish && appState.createFlow && appState.createFlow.step < 8) {
+      window.cfPublish('campaign');
+    } else {
+      renderContent();
+    }
+  };
+
+  /* ── Expose resetFlow so create-flow.js can call it ── */
+  window.campaignResetFlow = function () {
+    appState.campaignFlow = cpFreshFlow(appState);
+    appState.campaignUI = { mode: 'home', selectedId: null };
+  };
+
+  return { init: init, screenCampaign: screenCampaign, openFromCreate: openFromCreate };
 })();
 
 window.screenCampaign = function () { return CampaignFlow.screenCampaign(); };

@@ -408,6 +408,7 @@
 /* Footer & success */
 .cf-footer-mid { flex: 1; text-align: center; }
 .cf-eta { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+.cf-step5-pick-hint { font-size: 12px; color: var(--muted); font-style: italic; opacity: 0.7; }
 .btn[disabled] { cursor: not-allowed; pointer-events: none; filter: grayscale(0.25); }
 .cf-success-wrap { display: flex; align-items: center; justify-content: center; min-height: 60vh; }
 .cf-success-ring {
@@ -637,6 +638,79 @@
   border: 1px solid var(--border); border-radius: 999px; padding: 4px 11px;
 }
 .cf-intel-empty { background: rgba(252,211,153,0.08); border-color: rgba(252,211,153,0.4); }
+
+/* ─── Neutral rationale (no-intel state) ──────────────────── */
+.cf-rationale-neutral { color: var(--muted); font-style: italic; opacity: 0.75; }
+
+/* ─── Decision screen (step 6 — Prompt 3 replaces with overlay) ── */
+.cf-decision-wrap {
+  display: flex; align-items: center; justify-content: center; min-height: 60vh; padding: 40px 24px;
+}
+.cf-decision {
+  max-width: 420px; width: 100%; text-align: center;
+  animation: cf-fade-up 0.4s ease both;
+}
+.cf-decision-pf { margin-bottom: 16px; }
+.cf-decision-options {
+  display: flex; flex-direction: column; gap: 10px; margin-top: 0;
+}
+.cf-decision-btn {
+  width: 100%; justify-content: center; padding: 12px 20px !important; font-size: 14px !important;
+}
+
+/* ─── Stepper shown from step 1 ──────────────────────────── */
+.cf-stepper-wrap { margin-bottom: 28px; }
+
+/* ─── Decision screen ─────────────────────────────────────── */
+.cf-dec-heading {
+  font-size: 16px; font-weight: 600; color: var(--text);
+  margin-bottom: 16px; text-align: center;
+}
+.cf-dec-preview {
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 16px; margin-bottom: 24px;
+  max-width: 420px; width: 100%;
+}
+.cf-dec-preview-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.cf-dec-preview-body { font-size: 12px; }
+.cf-dec-preview-text { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.cf-dec-cards { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 420px; }
+.cf-dec-card {
+  display: flex; align-items: center; gap: 14px; padding: 16px 18px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); cursor: pointer; transition: all 0.15s;
+  text-align: left;
+}
+.cf-dec-card:hover { border-color: var(--primary); background: var(--card2); }
+.cf-dec-card-ghost { opacity: 0.75; }
+.cf-dec-card-ghost:hover { opacity: 1; }
+.cf-dec-card-icon { font-size: 22px; flex-shrink: 0; width: 36px; text-align: center; }
+.cf-dec-card-body { flex: 1; }
+.cf-dec-card-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.cf-dec-card-desc { font-size: 12px; color: var(--muted); line-height: 1.45; }
+.cf-dec-card-arrow { color: var(--muted); font-size: 20px; flex-shrink: 0; }
+.cf-dec-card-expanded {
+  flex-direction: column; align-items: stretch; cursor: default;
+  border-color: var(--primary); background: var(--card2);
+}
+.cf-dec-card-expanded:hover { border-color: var(--primary); }
+.cf-dec-card-expanded-title { font-size: 14px; font-weight: 600; color: var(--text); }
+
+/* ─── Campaign overlay panel styles ────────────────────────── */
+.cp-prefill-banner {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  padding: 10px 14px; margin-bottom: 10px; border-radius: var(--radius-sm);
+  background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.25);
+  font-size: 13px; color: var(--muted); line-height: 1.45;
+}
+.cp-seed-asset-note {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 10px 14px; margin-bottom: 20px; border-radius: var(--radius-sm);
+  background: var(--primary-dim); border: 1px solid rgba(99,102,241,0.25);
+}
 
 @media (max-width: 1100px) {
   .cf-body { grid-template-columns: 1fr; }
