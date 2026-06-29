@@ -507,20 +507,21 @@ var CreateFlow = (function () {
         + cfControlSelect('tone', 'Tone', o.tone, ['Match brand tone', 'Warm', 'Bold', 'Professional', 'Playful'])
         + cfControlSelect('style', 'Format style', o.style, ['Story-led', 'Listicle', 'Punchy one-liner', 'Q&A / hook']);
     } else if (f.modality === 'image') {
-      body = cfControlAspect(f, ['1:1', '4:5', '9:16', '1.91:1'])
+      /* Aspect ratio is locked by Format step — show read-only */
+      body = cfControlReadonly('Aspect ratio', (f.aspect || '1:1') + (f.dims ? ' · ' + f.dims : ''))
         + cfControlSelect('styleDir', 'Style direction', o.styleDir, ['Editorial craft', 'Minimal clean', 'Bold promo', 'Documentary / BTS'])
         + cfControlPalette(o.palette)
         + cfControlToggle('textOverlay', 'Text overlay', o.textOverlay);
     } else if (f.modality === 'video') {
-      // Type and duration are locked by Format step — show read-only, no separate dropdown
+      /* Type, duration, and aspect ratio are all locked by Format step */
       body = cfControlReadonly('Video type', f.format || '—')
         + cfControlReadonly('Duration', f.dims || '—')
-        + cfControlAspect(f, ['9:16', '1:1', '16:9'])
+        + cfControlReadonly('Aspect ratio', f.aspect || '—')
         + cfControlSelect('visualStyle', 'Visual style', o.visualStyle, ['Casual / UGC', 'Cinematic', 'Animated / Motion graphics', 'Documentary BTS'])
         + cfControlToggle('captions', 'Burn-in captions', o.captions)
         + cfControlTextarea('script', 'Script or scene description', o.script, 'Key scenes, dialogue, or shot list…');
     } else {
-      // Type and duration are locked by Format step — show read-only
+      /* Type and duration are locked by Format step */
       body = cfControlReadonly('Audio type', f.format || '—')
         + cfControlReadonly('Duration', f.dims || '—')
         + cfControlSelect('voiceStyle', 'Voice style', o.voiceStyle, ['Conversational', 'Calm', 'Energetic', 'Professional'])
@@ -570,7 +571,7 @@ var CreateFlow = (function () {
 
   function cfStepModality() {
     var f = cfFlow();
-    return '<div class="cf-hero">'
+    return '<div class="cf-step-body"><div class="cf-hero">'
       + '<div class="cf-step-title">Select content type</div>'
       + '<div class="cf-step-sub">Choose the format for this piece of content.</div>'
       + '<div class="cf-mod-grid">'
@@ -583,7 +584,7 @@ var CreateFlow = (function () {
             + '<div class="cf-mod-desc">' + m.desc + '</div></div>';
         }).join('')
       + '</div>'
-      + '</div>';
+      + '</div></div>';
   }
 
   function cfStepPlatform() {
@@ -595,35 +596,148 @@ var CreateFlow = (function () {
         + '<div class="platform-tile-name">' + p.id + '</div>'
         + '<div class="platform-tile-desc">' + p.desc + '</div></div>';
     }).join('');
-    return '<div class="cf-step-title">Publishing platform</div>'
+    return '<div class="cf-step-body">'
+      + '<div class="cf-step-title">Publishing platform</div>'
       + '<div class="cf-step-sub">Select the platform this content is being created for.</div>'
       + '<div class="platform-tile-grid">' + platHtml + '</div>'
-      + (f.platform ? '<div class="cf-format-meta"><span class="pill pill-indigo">' + f.platform + ' selected</span></div>' : '');
+      + '</div>';
+  }
+
+  function cfFormatPreview(f) {
+    var mod      = f.modality;
+    var aspect   = f.aspect  || '1:1';
+    var dims     = f.dims    || '';
+    var format   = f.format  || '';
+    var isRec    = !!f.suggestedFormat;
+    var platform = f.platform || '';
+    var brand    = (appState.intelligence && appState.intelligence.brand)
+                 || (appState.createBrief && appState.createBrief.brand)
+                 || 'Your brand';
+
+    /* Aspect ratio → pixel dimensions (max 220px on the longer side) */
+    function aspectDims(asp, maxLong) {
+      var p  = asp.split(':');
+      var rw = parseFloat(p[0]) || 1;
+      var rh = parseFloat(p[1]) || 1;
+      if (rw >= rh) return { w: maxLong, h: Math.round(maxLong * rh / rw) };
+      return { h: maxLong, w: Math.round(maxLong * rw / rh) };
+    }
+
+    var metaLine = [format, dims].filter(Boolean).join(' · ');
+    var recBadge = isRec ? '<span class="cf-fmt-rec-badge">Recommended</span>' : '';
+
+    /* ── Image ── */
+    if (mod === 'image') {
+      var id = aspectDims(aspect, 220);
+      return '<div class="cf-fmt-preview">'
+        + '<div class="cf-fmt-mockup">'
+        + '<div class="cf-fmt-mockup-head">'
+        +   '<div class="cf-fmt-avatar">' + brand.charAt(0).toUpperCase() + (brand.split(' ')[1] ? brand.split(' ')[1].charAt(0).toUpperCase() : '') + '</div>'
+        +   '<div class="cf-fmt-mockup-meta"><div class="cf-fmt-mockup-name">' + brand + '</div><div class="cf-fmt-mockup-platform">' + platform + '</div></div>'
+        + '</div>'
+        + '<div class="cf-fmt-img-frame" style="width:' + id.w + 'px;height:' + id.h + 'px;">'
+        +   '<span class="cf-fmt-img-asp">' + aspect + '</span>'
+        + '</div>'
+        + '<div class="cf-fmt-caption-lines">'
+        +   '<div class="cf-fmt-cap-line" style="width:88%;"></div>'
+        +   '<div class="cf-fmt-cap-line" style="width:64%;"></div>'
+        + '</div>'
+        + '</div>'
+        + '<div class="cf-fmt-preview-meta"><span class="cf-fmt-preview-name">' + metaLine + '</span>' + recBadge + '</div>'
+        + '</div>';
+    }
+
+    /* ── Video ── */
+    if (mod === 'video') {
+      var vd = aspectDims(aspect, 180);
+      var dur = dims || '0:30';
+      return '<div class="cf-fmt-preview">'
+        + '<div class="cf-fmt-mockup">'
+        + '<div class="cf-fmt-vid-frame" style="width:' + vd.w + 'px;height:' + vd.h + 'px;">'
+        +   '<div class="cf-fmt-vid-play">&#9654;</div>'
+        +   '<div class="cf-fmt-vid-dur">' + dur + '</div>'
+        +   '<div class="cf-fmt-vid-asp">' + aspect + '</div>'
+        + '</div>'
+        + '<div class="cf-fmt-vid-label">' + brand + ' &middot; ' + platform + '</div>'
+        + '</div>'
+        + '<div class="cf-fmt-preview-meta"><span class="cf-fmt-preview-name">' + metaLine + '</span>' + recBadge + '</div>'
+        + '</div>';
+    }
+
+    /* ── Text ── */
+    if (mod === 'text') {
+      return '<div class="cf-fmt-preview">'
+        + '<div class="cf-fmt-mockup cf-fmt-mockup-text">'
+        + '<div class="cf-fmt-mockup-head">'
+        +   '<div class="cf-fmt-avatar">' + brand.charAt(0).toUpperCase() + (brand.split(' ')[1] ? brand.split(' ')[1].charAt(0).toUpperCase() : '') + '</div>'
+        +   '<div class="cf-fmt-mockup-meta"><div class="cf-fmt-mockup-name">' + brand + '</div><div class="cf-fmt-mockup-platform">' + platform + '</div></div>'
+        + '</div>'
+        + '<div class="cf-fmt-text-body">'
+        +   '<div class="cf-fmt-text-line" style="width:92%;height:3px;"></div>'
+        +   '<div class="cf-fmt-text-line" style="width:100%;height:3px;"></div>'
+        +   '<div class="cf-fmt-text-line" style="width:76%;height:3px;"></div>'
+        +   '<div class="cf-fmt-text-line" style="width:88%;height:3px;margin-top:8px;"></div>'
+        +   '<div class="cf-fmt-text-line" style="width:60%;height:3px;"></div>'
+        +   '<div class="cf-fmt-text-line" style="width:82%;height:2px;"></div>'
+        + '</div>'
+        + '<div class="cf-fmt-text-cta"><div class="cf-fmt-text-btn"></div></div>'
+        + '</div>'
+        + '<div class="cf-fmt-preview-meta"><span class="cf-fmt-preview-name">' + metaLine + '</span>' + recBadge + '</div>'
+        + '</div>';
+    }
+
+    /* ── Audio ── */
+    var wbars = [28,52,40,76,50,66,36,84,60,46,70,42,80,54,30,66,46,72,42,58];
+    return '<div class="cf-fmt-preview">'
+      + '<div class="cf-fmt-mockup cf-fmt-mockup-audio">'
+      + '<div class="cf-fmt-audio-player">'
+      +   '<div class="cf-fmt-audio-play">&#9654;</div>'
+      +   '<div class="cf-fmt-wave"><div class="cf-fmt-wave-inner">'
+      +     wbars.map(function(h){ return '<span style="height:' + h + '%;"></span>'; }).join('')
+      +   '</div></div>'
+      +   '<div class="cf-fmt-audio-dur">' + (dims || '00:30') + '</div>'
+      + '</div>'
+      + '<div class="cf-fmt-vid-label">' + brand + ' &middot; ' + format + '</div>'
+      + '</div>'
+      + '<div class="cf-fmt-preview-meta"><span class="cf-fmt-preview-name">' + metaLine + '</span>' + recBadge + '</div>'
+      + '</div>';
   }
 
   function cfStepFormat() {
     var f = cfFlow();
     var formats = (CF_FORMATS[f.modality] && f.platform && CF_FORMATS[f.modality][f.platform]) || [];
     var sugIdx = f.platform ? cfSuggestedIndex(f.modality, f.platform) : 0;
-    var recName = formats.length && formats[sugIdx] ? formats[sugIdx].id : '';
     var why = CF_SUGGEST_WHY[f.modality + ':' + f.platform] || '';
-    var fmtHtml = formats.length ? '<div class="format-chip-row" style="margin-top:8px;">'
+
+    if (!formats.length) {
+      return '<div class="cf-step-body">'
+        + '<div class="cf-step-title">Format</div>'
+        + '<div class="cf-step-sub">Select a platform first to see available formats.</div>'
+        + '</div>';
+    }
+
+    var chips = '<div class="format-chip-row cf-fmt-chips">'
       + formats.map(function (fmt, i) {
           var sug = i === sugIdx;
-          return '<span class="format-chip' + (f.format === fmt.id ? ' active' : '') + (sug ? ' cf-suggested' : '') + '" onclick="cfSelectFormat(' + i + ')">'
-            + fmt.id + (sug ? ' <span class="format-chip-rec">★ Recommended</span>' : '') + '</span>';
+          var active = f.format === fmt.id;
+          return '<span class="format-chip' + (active ? ' active' : '') + (sug ? ' cf-suggested' : '') + '" onclick="cfSelectFormat(' + i + ')">'
+            + fmt.id + (sug ? ' <span class="format-chip-rec">Recommended</span>' : '') + '</span>';
         }).join('')
-      + '</div>'
-      + (recName ? '<div class="cf-rec-note">★ <strong>' + recName + '</strong> recommended for ' + f.platform + (why ? ' — ' + why : '') + '</div>' : '')
-      + (f.format ? '<div class="cf-format-meta">'
-        + '<span class="ch-compliance ok">&#10003; ' + f.format + (f.dims ? ' · ' + f.dims : '') + (f.aspect ? ' · ' + f.aspect : '') + '</span>'
-        + (f.suggestedFormat ? '<span class="cf-suggest-badge">★ Recommended for ' + f.platform + '</span>' : '<span class="cf-suggest-badge cf-suggest-badge-alt">Custom choice</span>')
-        + '</div>' : '')
-      : '<div class="cf-history-empty" style="padding:24px 0;">Select a platform first to see recommended formats.</div>';
-    return '<div class="cf-step-title">Format</div>'
-      + '<div class="cf-step-sub">Dimensions and format are pre-set to ' + (f.platform || 'platform') + ' standards. Adjust as needed.</div>'
-      + (f.platform ? '<div class="pill pill-muted" style="margin-bottom:10px;">' + f.platform + '</div>' : '')
-      + fmtHtml;
+      + '</div>';
+
+    var recNote = why
+      ? '<div class="cf-rec-note">' + why + '</div>'
+      : '';
+
+    var preview = f.format ? cfFormatPreview(f) : '<div class="cf-fmt-preview-empty">Select a format above to see a preview</div>';
+
+    return '<div class="cf-step-body">'
+      + '<div class="cf-step-title">Format</div>'
+      + '<div class="cf-step-sub">Pre-set to ' + (f.platform || 'platform') + ' standards. Change if needed.</div>'
+      + chips
+      + recNote
+      + preview
+      + '</div>';
   }
 
   function cfStepGenerateProgress() {
@@ -793,12 +907,14 @@ var CreateFlow = (function () {
     if (f.generating) return cfStepGenerateProgress();
     var hasIntel = cfHasIntelligence();
     var vars = f.modality === 'image' ? CF_IMAGE_VARS : f.modality === 'video' ? CF_VIDEO_VARS : f.modality === 'audio' ? CF_AUDIO_VARS : CF_TEXT_VARS;
-    return '<div class="cf-step-title">Pick a variation</div>'
-      + '<div class="cf-step-sub">' + (hasIntel ? '3 options · persona-scored · storyboard + strategic rationale' : '3 options · generated from your brief · storyboard included') + '</div>'
+    return '<div class="cf-step-body cf-step-body-wide">'
+      + '<div class="cf-step-title">Select a variation</div>'
+      + '<div class="cf-step-sub">' + (hasIntel ? 'Three options, persona-scored. Select one to proceed.' : 'Three options generated from your brief. Select one to proceed.') + '</div>'
       + cfAppliedBar(f)
       + cfBriefSignalBar(true)
       + '<div class="variation-grid">' + vars.map(function (v, i) { return cfVariationCard(v, i, f); }).join('') + '</div>'
-      + '<button class="btn btn-ghost btn-sm" onclick="cfRegenerate()" style="margin-top:8px;">↻ Regenerate variations</button>';
+      + '<button class="btn btn-ghost btn-sm" onclick="cfRegenerate()" style="margin-top:8px;">&#8635; Regenerate</button>'
+      + '</div>';
   }
 
   function cfStepEdit() {
@@ -916,9 +1032,9 @@ var CreateFlow = (function () {
       + ['Thu 10:00 AM', 'Fri 8:00 AM', 'Sat 9:00 AM', 'Custom…'].map(function (t) {
           return '<option' + (appState.cfScheduleTime === t ? ' selected' : '') + '>' + t + '</option>';
         }).join('') + '</select></div>'
-      + '<button class="btn btn-primary cf-pub-btn" onclick="cfPublish(\'now\')">🚀 Publish now</button>'
-      + '<button class="btn btn-outline cf-pub-btn" onclick="cfPublish(\'schedule\')">📅 Schedule for ' + appState.cfScheduleTime + '</button>'
-      + '<button class="btn btn-outline cf-pub-btn" onclick="cfPublish(\'campaign\')">🗂️ Add to campaign</button>'
+      + '<button class="btn btn-primary cf-pub-btn" onclick="cfPublish(\'now\')">Publish now</button>'
+      + '<button class="btn btn-outline cf-pub-btn" onclick="cfPublish(\'schedule\')">Schedule for ' + appState.cfScheduleTime + '</button>'
+      + '<button class="btn btn-outline cf-pub-btn" onclick="cfPublish(\'campaign\')">Add to campaign</button>'
       + '<button class="btn btn-ghost cf-pub-btn" onclick="cfPublish(\'draft\')">Save as draft</button>'
       + '</div></div>';
   }
@@ -997,12 +1113,15 @@ var CreateFlow = (function () {
   window.cfSelectVariation = function (i) {
     var f = cfFlow();
     f.variation = i;
-    renderContent(); /* shows "Selected ✓" immediately */
+    /* Direct DOM update — toggle selected class and button text without a full re-render (no blink) */
+    document.querySelectorAll('.variation-card').forEach(function (card, idx) {
+      card.classList.toggle('selected', idx === i);
+      var btn = card.querySelector('button');
+      if (btn) btn.textContent = idx === i ? 'Selected ✓' : 'Select';
+    });
     if (!f.generating && f.step === 5) {
-      /* Brief highlight window, then advance to decision screen */
       setTimeout(function () {
         var fc = cfFlow();
-        /* Guard: only advance if the user's selection hasn't changed and we're still at step 5 */
         if (fc.variation === i && fc.step === 5 && !fc.generating) {
           fc.step = 6;
           renderContent();
@@ -1327,7 +1446,8 @@ var CreateFlow = (function () {
       persona: brief.persona,
       message: brief.message,
       proof: brief.proof,
-      cta: brief.cta
+      cta: brief.cta,
+      platform: f.platform || ''
     }, seedAsset);
   };
 

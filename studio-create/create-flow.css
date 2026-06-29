@@ -1,6 +1,10 @@
 /* Unified creation flow */
 .cf-screen { padding: 0; min-height: 100%; display: flex; flex-direction: column; }
 @keyframes cf-step-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+/* Content width constraint — all wizard steps wrap in this */
+.cf-step-body { max-width: 740px; margin: 0 auto; width: 100%; }
+/* Wider variant for the variation grid (2-col cards need more room) */
+.cf-step-body-wide { max-width: 880px; }
 .cf-topbar {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   padding: 14px 24px; border-bottom: 1px solid var(--border); background: var(--card);
@@ -91,21 +95,22 @@
 .cf-brief-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
 /* ─── Centered brief step ────────────────────────────────── */
-.cf-brief-center { max-width: 660px; margin: 0 auto; padding-top: 16px; }
+.cf-brief-center { max-width: 740px; margin: 0 auto; padding-top: 16px; width: 100%; }
 .cf-brief-center .cf-step-title,
 .cf-brief-center .cf-step-sub { text-align: center; }
 .cf-brief-pills { justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
 
 /* ─── Three-card layout ──────────────────────────────────── */
-.cf-brief-cards { display: flex; flex-direction: column; gap: 16px; }
+.cf-brief-cards { display: flex; flex-direction: column; gap: 12px; }
 .cf-brief-card-section {
   background: var(--card); border: 1px solid var(--border);
+  border-left: 3px solid var(--primary);
   border-radius: var(--radius); padding: 20px 22px;
   display: flex; flex-direction: column; gap: 14px;
 }
 .cf-brief-card-heading {
-  font-size: 13px; font-weight: 700; color: var(--text); line-height: 1;
-  padding-bottom: 2px;
+  font-size: 14px; font-weight: 700; color: var(--text); line-height: 1;
+  padding-bottom: 2px; letter-spacing: -0.01em;
 }
 .cf-brief-card-sub {
   font-size: 12px; color: var(--muted); line-height: 1.45;
@@ -611,6 +616,123 @@
   border: 1px solid rgba(99,102,241,0.2); border-radius: var(--radius-sm); line-height: 1.5;
 }
 .cf-suggest-badge-alt { background: var(--card2) !important; color: var(--muted) !important; border-color: var(--border) !important; }
+.cf-fmt-chips { margin-top: 8px; }
+
+/* ─── Format preview card ─────────────────────────────────── */
+.cf-fmt-preview {
+  margin-top: 20px; padding: 28px 24px;
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+  animation: cf-step-fade 0.2s ease both;
+}
+.cf-fmt-preview-empty {
+  margin-top: 16px; padding: 24px; text-align: center;
+  font-size: 13px; color: var(--muted);
+  background: var(--card); border: 1px dashed var(--border); border-radius: var(--radius);
+}
+
+/* Shared mockup wrapper */
+.cf-fmt-mockup { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+/* Mockup chrome — avatar + name row */
+.cf-fmt-mockup-head {
+  display: flex; align-items: center; gap: 8px; align-self: stretch;
+}
+.cf-fmt-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--primary); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; flex-shrink: 0;
+}
+.cf-fmt-mockup-meta { display: flex; flex-direction: column; gap: 1px; }
+.cf-fmt-mockup-name { font-size: 12px; font-weight: 600; color: var(--text); }
+.cf-fmt-mockup-platform { font-size: 10px; color: var(--muted); }
+
+/* Image frame */
+.cf-fmt-img-frame {
+  background: linear-gradient(135deg, #1a1f35 0%, #2d1b4e 60%, #1e2a45 100%);
+  border-radius: 6px; display: flex; align-items: flex-end; justify-content: flex-end;
+  padding: 6px; flex-shrink: 0; position: relative; overflow: hidden;
+}
+.cf-fmt-img-asp {
+  font-size: 10px; font-family: 'DM Mono', monospace; color: rgba(255,255,255,0.4);
+  background: rgba(0,0,0,0.3); padding: 2px 5px; border-radius: 3px;
+}
+.cf-fmt-caption-lines { align-self: stretch; display: flex; flex-direction: column; gap: 5px; }
+.cf-fmt-cap-line { height: 2px; background: rgba(154,160,180,0.2); border-radius: 1px; }
+
+/* Video frame */
+.cf-fmt-vid-frame {
+  background: linear-gradient(135deg, #0e1320 0%, #1a1040 60%, #0e1a30 100%);
+  border-radius: 6px; position: relative; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.cf-fmt-vid-play {
+  font-size: 18px; color: rgba(255,255,255,0.6);
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.25);
+  display: flex; align-items: center; justify-content: center;
+}
+.cf-fmt-vid-dur {
+  position: absolute; bottom: 6px; right: 7px;
+  font-size: 10px; font-family: 'DM Mono', monospace;
+  color: rgba(255,255,255,0.65); background: rgba(0,0,0,0.45);
+  padding: 1px 5px; border-radius: 3px;
+}
+.cf-fmt-vid-asp {
+  position: absolute; top: 6px; left: 7px;
+  font-size: 9px; font-family: 'DM Mono', monospace;
+  color: rgba(255,255,255,0.3);
+}
+.cf-fmt-vid-label { font-size: 11px; color: var(--muted); }
+
+/* Text post mockup */
+.cf-fmt-mockup-text { width: 240px; }
+.cf-fmt-text-body {
+  align-self: stretch; display: flex; flex-direction: column; gap: 5px; margin: 6px 0;
+}
+.cf-fmt-text-line { background: rgba(154,160,180,0.18); border-radius: 2px; }
+.cf-fmt-text-cta { align-self: flex-start; margin-top: 6px; }
+.cf-fmt-text-btn {
+  width: 64px; height: 22px; border-radius: 3px;
+  background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.3);
+}
+
+/* Audio player */
+.cf-fmt-mockup-audio { width: 240px; }
+.cf-fmt-audio-player {
+  align-self: stretch; display: flex; align-items: center; gap: 8px;
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 10px 12px;
+}
+.cf-fmt-audio-play {
+  font-size: 11px; color: var(--primary); flex-shrink: 0;
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 1px solid rgba(99,102,241,0.4);
+  display: flex; align-items: center; justify-content: center;
+}
+.cf-fmt-wave { flex: 1; height: 28px; overflow: hidden; }
+.cf-fmt-wave-inner { display: flex; align-items: center; gap: 2px; height: 100%; }
+.cf-fmt-wave-inner span { flex: 1; background: rgba(99,102,241,0.4); border-radius: 1px; }
+.cf-fmt-audio-dur {
+  font-size: 10px; font-family: 'DM Mono', monospace;
+  color: var(--muted); flex-shrink: 0;
+}
+
+/* Meta row below mockup */
+.cf-fmt-preview-meta {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.cf-fmt-preview-name {
+  font-size: 11px; font-family: 'DM Mono', monospace;
+  color: var(--muted); letter-spacing: 0.03em;
+}
+.cf-fmt-rec-badge {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--accent);
+  padding: 2px 8px; border-radius: 20px;
+  background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.25);
+}
 
 /* ─── Applied preferences strip (Fix 2b) ─────────────────────── */
 .cf-prefs-strip {

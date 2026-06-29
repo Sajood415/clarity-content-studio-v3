@@ -1937,7 +1937,7 @@ var CampaignFlow = (function () {
       objective: 'Launch',
       startDate: today, startTime: '09:00',
       endDate: endDate, endTime: '17:00',
-      platforms: [],
+      platforms: briefData.platform ? [briefData.platform] : [],
       series: [series0],
       activeSeriesIdx: 0,
       mixInitialized: false,
@@ -1970,30 +1970,11 @@ var CampaignFlow = (function () {
 
   /* ── Close overlay (called by the ← Back button or backdrop click) ── */
   window.campaignCloseOverlay = function () {
-    var f = cpFlow();
-    var platformsSelected = f && f.platforms && f.platforms.length > 0;
-
-    if (!platformsSelected) {
-      /* Nothing was configured — confirm discard */
-      if (!window.confirm('Discard campaign setup and just save as draft instead?')) return;
-      appState.cpOverlayOpen = false;
-      appState.campaignFlow = cpFreshFlow(appState);
-      appState.campaignUI = { mode: 'home', selectedId: null };
-      /* Save the create-flow content as draft */
-      if (window.cfPublish) window.cfPublish('draft');
-      else renderContent();
-      return;
-    }
-
-    /* Platforms were selected — treat as "added to campaign" */
+    /* Just close the drawer and return to the decision screen — no confirm, no auto-save */
     appState.cpOverlayOpen = false;
     appState.campaignFlow = cpFreshFlow(appState);
     appState.campaignUI = { mode: 'home', selectedId: null };
-    if (window.cfPublish && appState.createFlow && appState.createFlow.step < 8) {
-      window.cfPublish('campaign');
-    } else {
-      renderContent();
-    }
+    renderContent();
   };
 
   /* ── Called when user completes campaign wizard inside the overlay ── */

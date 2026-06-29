@@ -51,11 +51,13 @@ a { text-decoration: none; color: inherit; }
 
 /* Brand wordmark top-left */
 .home-brand {
-  padding: 24px 36px;
+  padding: 20px 36px;
   display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
 }
 .home-brand-name {
-  font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700;
+  font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 700;
   color: var(--text); letter-spacing: 0.01em; line-height: 1;
 }
 .home-brand-name em { color: var(--primary); font-style: normal; }
@@ -523,16 +525,16 @@ function renderApp() {
         return;
       }
     }
-    /* Full render with a step-fade so the DOM swap isn't a hard cut */
-    var prev = el.querySelector('.cf-main, .cf-decision-wrap');
-    if (prev) {
-      prev.style.animation = 'none';
-      prev.style.opacity = '0';
-    }
+    /* Only animate when the step actually changed — not on in-step interactions (tile clicks etc.) */
+    var currentStep = appState.createFlow ? appState.createFlow.step : 0;
+    var stepChanged = appState._cfPrevStep !== currentStep;
+    appState._cfPrevStep = currentStep;
+
     el.innerHTML = screenCreateFlow();
-    var next = el.querySelector('.cf-main, .cf-decision-wrap');
-    if (next) {
-      next.style.animation = 'cf-step-fade 0.18s ease both';
+
+    if (stepChanged) {
+      var next = el.querySelector('.cf-main, .cf-decision-wrap');
+      if (next) next.style.animation = 'cf-step-fade 0.18s ease both';
     }
     return;
   }
@@ -566,8 +568,8 @@ function init() {
 window.addEventListener('load', init);
 
 </script>
-<script src="studio-create/create-flow.js?v=8"></script>
-<script src="studio-campaign/campaign-flow.js?v=9"></script>
+<script src="studio-create/create-flow.js?v=10"></script>
+<script src="studio-campaign/campaign-flow.js?v=10"></script>
 <script src="studio-text/studio-text.js?v=8"></script>
 <script src="studio-image/studio-image.js?v=7"></script>
 <script src="studio-video/studio-video.js?v=5"></script>
