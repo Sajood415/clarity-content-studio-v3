@@ -1735,9 +1735,8 @@ var CreateFlow = (function () {
         + '</div>';
     }).join('');
     var detail = appState.cfLibrarySelectedId ? cfLibraryDetail(cfGetLibraryItem(appState.cfLibrarySelectedId)) : '';
-    return '<div class="screen"><div class="flex-between" style="margin-bottom:18px;">'
-      + '<div><h1 class="screen-title">Library</h1><p class="screen-sub">All generated assets, reusable any time</p></div>'
-      + '<button class="btn btn-primary" onclick="cfReset()">+ Create new</button></div>'
+    return '<div class="screen"><div style="margin-bottom:18px;">'
+      + '<h1 class="screen-title">Library</h1><p class="screen-sub">All generated assets, reusable any time</p></div>'
       + '<div class="cf-lib-filters">'
       + ['all', 'text', 'image', 'video', 'audio'].map(function (mod) {
           return '<span class="format-chip' + (filter === mod ? ' active' : '') + '" onclick="cfSetLibraryFilter(\'' + mod + '\')">' + (mod === 'all' ? 'All' : cfPrettyModality(mod)) + '</span>';
